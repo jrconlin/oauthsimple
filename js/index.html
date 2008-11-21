@@ -22,13 +22,13 @@
         // Don't have a magical Netflix API key yet?
         // http://developer.netflix.com
         //
+            // Some easy defines
             var apiKey = "nO-woRk";
             var sharedSecret = "ExAMple01";
             var accessToken = "This-Will-NOT.wOrk.EIthEr";
             var tokenSecret = "N0sOuP4U";
 
-            if (apiKey == "nO-woRk")
-                alert('Remember, the key/values defined here need to be changed to valid values before the API calls will work. Currently, these links are only for demonstration purposes.');
+            var path="http://api.netflix.com/catalog/titles"
             var argumentsAsString = "term=rat&expand=formats,synopsis&max_results=1&boo=foo&boo=bar";
             var argumentsAsObject = {
                 term:'rat',
@@ -37,9 +37,11 @@
                 boo: ['foo','bar']      //there are some webapps that take an array this way.
             };
 
-            var path="http://api.netflix.com/catalog/titles"
+            if (apiKey == "nO-woRk")
+                alert('Remember, the key/values defined here need to be changed to valid values before the API calls will work. Currently, these links are only for demonstration purposes.');
 
-            // The hard way...
+
+            // Test 1 ===== The hard way...
             var oauth = OAuthSimple(apiKey,sharedSecret);
             oauth.setParameters(argumentsAsString);
                 oauth.setPath(path);
@@ -47,7 +49,7 @@
             if (window.console != null)
                 console.debug('Sample 1',sample1Results);
 
-            // the semi-easy way.
+            // Test 2 ===== the semi-easy way.
             var oauth2 = OAuthSimple(apiKey,sharedSecret);
             var sample2Results = oauth2.sign({action:'GET',
                                              path:path,
@@ -56,7 +58,7 @@
             if (window.console != null)
                 console.debug('Sample 2',sample2Results);
 
-            // the totally easy way.
+            // Test 3 ===== the totally easy way.
             var sample3Results = OAuthSimple().sign({path:path,
                                                   parameters:argumentsAsObject,
                                                   signatures:{

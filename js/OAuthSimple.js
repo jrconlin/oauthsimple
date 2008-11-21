@@ -45,7 +45,7 @@ if (OAuthSimple == null)
      * transmission or reception of the tokens. It does not validate elements
      * of the token. It is for client use only.
      *
-     * api_key is the API key, also known as the OAuth consumer secret
+     * api_key is the API key, also known as the OAuth consumer key
      * shared_secret is the shared secret (duh).
      *
      * Both the api_key and shared_secret are generally provided by the site
@@ -61,11 +61,13 @@ if (OAuthSimple == null)
      *
      * Example:
        <code>
-        var oauthObject = OAuthSimple().sign(path:'http://example.com/rest/',
-                                             parameters: 'foo=bar&gorp=banana',
-                                             signatures:{api_key:'12345abcd',
-                                                   shared_secret:'xyz-5309'});
-        document.getElementById('someLink').href=oauthObject.signedUrl;
+        var oauthObject = OAuthSimple().sign({path:'http://example.com/rest/',
+                                              parameters: 'foo=bar&gorp=banana',
+                                              signatures:{
+                                                api_key:'12345abcd',
+                                                shared_secret:'xyz-5309'
+                                             }});
+        document.getElementById('someLink').href=oauthObject.signed_url;
        </code>
      *
      * that will sign as a "GET" using "SHA1-MAC" the url. If you need more than
