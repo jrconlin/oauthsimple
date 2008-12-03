@@ -3,12 +3,12 @@
   * A simpler version of OAuth
   *
   * author:     jr conlin
-  * mail:       jconlin@netflix.com
-  * copyright:  Netflix, Inc.
-  * version:    0.1 (Not Ready For Prime Time)
-  * url:        http://developer.netflix.com
+  * mail:       src@anticipatr.com
+  * copyright:  unitedHeroes.net
+  * version:    0.2 (Not Ready For Prime Time)
+  * url:        http://unitedHeroes.net/OAuthSimple
   *
-  * Copyright (c) 2008, Netflix, Inc.
+  * Copyright (c) 2008, unitedHeroes.net
   * All rights reserved.
   *
   * Redistribution and use in source and binary forms, with or without
@@ -92,7 +92,7 @@ class OAuthSimple {
      */
     function OAuthSimple ($APIKey = "",$sharedSecret=""){
         if (!empty($APIKey))
-            $this->_secrets{'api_key'}=$APIKey;
+            $this->_secrets{'consumer_key'}=$APIKey;
         if (!empty($sharedSecret))
             $this->_secrets{'shared_secret'}=$sharedSecret;
         $this->_default_signature_method="HMAC-SHA1";
@@ -105,16 +105,14 @@ class OAuthSimple {
     *
     * @param {string,object} List of parameters for the call, this can either be a URI string (e.g. "foo=bar&gorp=banana" or an object/hash)
     */
-    function setParameters ($parameters) {
-        if (empty($parameters))
-            throw new OAuthSimpleException('No parameters specified for OAuthSimple.setParameters');
+    function setParameters ($parameters=Array()) {
         if (is_string($parameters))
             $parameters = $this->_parseParameterString($parameters);
         $this->_parameters = $parameters;
         if (empty($this->_parameters[oauth_nonce]))
             $this->_getNonce();
         if (empty($this->_parameters[oauth_timestamp]))
-            $this->_getTimestamp();
+            $this->_getTimeStamp();
         if (empty($this->_parameters[oauth_consumer_key]))
             $this->_getApiKey();
         if (empty($this->_parameters[oauth_token]))
@@ -125,10 +123,7 @@ class OAuthSimple {
         return $this;
     }
 
-    /** convienence method for setParameters
-    *
-    * @param parameters {string,object} See .setParameters
-    */
+    // convienence method for setParameters
     function setQueryString ($parameters) {
         return $this->setParameters($parameters);
     }
@@ -168,7 +163,7 @@ class OAuthSimple {
 
     /** set the signatures (as well as validate the ones you have)
     *
-    * @param signatures {object} object/hash of the token/signature pairs {api_key:, shared_secret:, access_token: access_secret:}
+    * @param signatures {object} object/hash of the token/signature pairs {api_key:, shared_secret:, oauth_token: oauth_secret:}
     */
     function setTokensAndSecrets ($signatures) {
         if (!empty($signatures) && !is_array($signatures))
@@ -176,14 +171,20 @@ class OAuthSimple {
         if (!empty($signatures))
             foreach ($signatures as $sig=>$value)
                 $this->_secrets[$sig] = $value;
-        if (!empty($this->_secrets['consumer_key']) && empty($this->_secrets['api_key']))
-            $this->_secrets['api_key'] = $this->_secrets['consumer_key'];
-        if (empty($this->_secrets['api_key']))
-            throw new OAuthSimpleException('Missing required api_key or consumer_key in OAuthSimple.setTokensAndSecrets');
+        // Aliases
+        if ($this->_secrets['api_key'])
+            $this->_secrets['consumer_key'] = $this->_secrets['api_key'];
+        if ($this->_secrets['access_token'])
+            $this->_secrets['oauth_token'] = $this->_secrets['access_token'];
+        if ($this->_secrets['access_secret'])
+            $this->_secrets['oauth_secret'] = $this->_secrets['access_secret'];
+        // Gauntlet
+        if (empty($this->_secrets['consumer_key']))
+            throw new OAuthSimpleException('Missing required consumer_key in OAuthSimple.setTokensAndSecrets');
         if (empty($this->_secrets['shared_secret']))
             throw new OAuthSimpleException('Missing requires shared_secret in OAuthSimple.setTokensAndSecrets');
-        if (!empty($this->_secrets['access_token']) && empty($this->_secrets[access_secret]))
-            throw new OAuthSimpleException('Missing access_secret for supplied access_token in OAuthSimple.setTokensAndSecrets');
+        if (!empty($this->_secrets['oauth_token']) && empty($this->_secrets[oauth_secret]))
+            throw new OAuthSimpleException('Missing oauth_secret for supplied oauth_token in OAuthSimple.setTokensAndSecrets');
         return this;
     }
 
@@ -224,8 +225,7 @@ class OAuthSimple {
         if (!empty($args[method]))
             $this->setSignatureMethod($args[method]);
         $this->setTokensAndSecrets($args[signatures]);
-        if (!empty($args[parameters]))
-            $this->setParameters($args[parameters]);
+        $this->setParameters($args[parameters]);
         $normParams = $this->_normalizedParameters();
         $this->_parameters['oauth_signature'] = $this->_generateSignature($normParams);
         return Array(
@@ -318,25 +318,25 @@ class OAuthSimple {
     }
 
     function _getApiKey() {
-        if (empty($this->_secrets['api_key']))
+        if (empty($this->_secrets['consumer_key']))
         {
-            throw new OAuthSimpleException('No api_key (oauth_consumer_key) set for OAuthSimple');
+            throw new OAuthSimpleException('No consumer_key set for OAuthSimple');
         }
-        $this->_parameters['oauth_consumer_key']=$this->_secrets['api_key'];
+        $this->_parameters['oauth_consumer_key']=$this->_secrets['consumer_key'];
         return $this->_parameters['oauth_consumer_key'];
     }
 
     function _getAccessToken() {
-        if ($this->_secrets['access_secret'] == null)
+        if ($this->_secrets['oauth_secret'] == null)
             return '';
-        if ($this->_secrets['access_token'] == null)
-            throw new OAuthSimpleException('No access token (oauth_access_token) set for OAuthSimple.');
-        $this->_parameters['oauth_access_token'] = $this->_secrets['access_token'];
-        return $this->_parameters['oauth_access_token'];
+        if ($this->_secrets['oauth_token'] == null)
+            throw new OAuthSimpleException('No access token (oauth_token) set for OAuthSimple.');
+        $this->_parameters['oauth_token'] = $this->_secrets['oauth_token'];
+        return $this->_parameters['oauth_token'];
     }
 
     function _getTimeStamp() {
-        return $this->_parameters['oauth_timestamp'] = floor(time()/1000);
+        return $this->_parameters['oauth_timestamp'] = time();
     }
 
     function _normalizedParameters() {
@@ -360,14 +360,14 @@ class OAuthSimple {
 
     function _generateSignature () {
         $secretKey = $this->_oauthEscape($this->_secrets['shared_secret']) .
-            '&' . $this->_oauthEscape($this->_secrets['access_secret']);
+            '&' . $this->_oauthEscape($this->_secrets['oauth_secret']);
         switch($this->_parameters['oauth_signature_method'])
         {
             case 'PLAINTEXT':
                 return $secretKey;
 
             case 'HMAC-SHA1':
-                $sigString = $this->_access.'&'.$this->_path.'&'.$this->_normalizedParameters();
+                $sigString = $this->_oauthEscape($this->_access).'&'.$this->_oauthEscape($this->_path).'&'.$this->_oauthEscape($this->_normalizedParameters());
                 return base64_encode(hash_hmac('sha1',$sigString,$secretKey,true));
 
             default:

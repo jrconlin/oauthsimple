@@ -2,12 +2,12 @@
   * A simpler version of OAuth
   *
   * author:     jr conlin
-  * mail:       jconlin@netflix.com
-  * copyright:  Netflix, Inc.
-  * version:    0.1 (Not Ready For Prime Time)
-  * url:        http://developer.netflix.com
+  * mail:       src@anticipatr.com
+  * copyright:  unitedHeroes.net
+  * version:    0.2 (Not Ready For Prime Time)
+  * url:        http://unitedHeroes.net/OAuthSimple
   *
-  * Copyright (c) 2008, Netflix, Inc.
+  * Copyright (c) 2008, unitedHeroes.net
   * All rights reserved.
   *
   * Redistribution and use in source and binary forms, with or without
@@ -81,7 +81,7 @@ if (OAuthSimple == null)
      * @param api_key {string}       The API Key (sometimes referred to as the consumer key) This value is usually supplied by the site you wish to use.
      * @param shared_secret (string) The shared secret. This value is also usually provided by the site you wish to use.
      */
-    OAuthSimple = function (api_key,shared_secret)
+    OAuthSimple = function (consumer_key,shared_secret)
     {
 /*        if (api_key == null)
             throw("Missing argument: api_key (oauth_consumer_key) for OAuthSimple. This is usually provided by the hosting site.");
@@ -91,8 +91,8 @@ if (OAuthSimple == null)
 
 
         // General configuration options.
-        if (api_key != null)
-            this._secrets['api_key'] = api_key;
+        if (consumer_key != null)
+            this._secrets['consumer_key'] = consumer_key;
         if (shared_secret != null)
             this._secrets['shared_secret'] = shared_secret;
         this._default_signature_method= "HMAC-SHA1";
@@ -166,20 +166,26 @@ if (OAuthSimple == null)
 
         /** set the signatures (as well as validate the ones you have)
          *
-         * @param signatures {object} object/hash of the token/signature pairs {api_key:, shared_secret:, access_token: access_secret:}
+         * @param signatures {object} object/hash of the token/signature pairs {api_key:, shared_secret:, oauth_token: oauth_secret:}
          */
         this.setTokensAndSecrets = function(signatures) {
             if (signatures)
                 for (var i in signatures)
                     this._secrets[i] = signatures[i];
-            if (this._secrets['consumer_key'] != null && this._secrets['api_key'] == null)
-                this._secrets.api_key = this._secrets['consumer_key'];
-            if (this._secrets.api_key == null)
-                throw('Missing required api_key or consumer_key in OAuthSimple.setTokensAndSecrets');
+            // Aliases
+            if (this._secrets['api_key'])
+                this._secrets.consumer_key = this._secrets.api_key;
+            if (this._secrets['access_token'])
+                this._secrets.oauth_token = this._secrets.access_token;
+            if (this._secrets['access_secret'])
+                this._secrets.oauth_secret = this._secrets.access_secret;
+            // Gauntlet
+            if (this._secrets.consumer_key == null)
+                throw('Missing required consumer_key in OAuthSimple.setTokensAndSecrets');
             if (this._secrets.shared_secret == null)
                 throw('Missing required shared_secret in OAuthSimple.setTokensAndSecrets');
-            if ((this._secrets.access_token!=null) && (this._secrets.access_secret == null))
-                throw('Missing access_secret for supplied access_token in OAuthSimple.setTokensAndSecrets');
+            if ((this._secrets.oauth_token!=null) && (this._secrets.oauth_secret == null))
+                throw('Missing oauth_secret for supplied oauth_token in OAuthSimple.setTokensAndSecrets');
             return this;
         };
 
@@ -320,19 +326,19 @@ if (OAuthSimple == null)
         };
 
         this._getApiKey = function() {
-            if (this._secrets.api_key == null)
-                throw('No api_key (oauth_consumer_key) set for OAuthSimple.');
-            this._parameters['oauth_consumer_key']=this._secrets.api_key;
+            if (this._secrets.consumer_key == null)
+                throw('No consumer_key set for OAuthSimple.');
+            this._parameters['oauth_consumer_key']=this._secrets.consumer_key;
             return this._parameters.oauth_consumer_key;
         };
 
         this._getAccessToken = function() {
-            if (this._secrets['access_secret'] == null)
+            if (this._secrets['oauth_secret'] == null)
                 return '';
-            if (this._secrets['access_token'] == null)
-                throw('No access_token (oauth_access_token) set for OAuthSimple.');
-            this._parameters['oauth_access_token'] = this._secrets.access_token;
-            return this._parameters.oauth_access_token;
+            if (this._secrets['oauth_token'] == null)
+                throw('No oauth_token (access_token) set for OAuthSimple.');
+            this._parameters['oauth_token'] = this._secrets.oauth_token;
+            return this._parameters.oauth_token;
         };
 
         this._getTimestamp = function() {
@@ -381,14 +387,14 @@ if (OAuthSimple == null)
         this._generateSignature = function() {
 
             var secretKey = this._oauthEscape(this._secrets.shared_secret)+'&'+
-                this._oauthEscape(this._secrets.access_secret);
+                this._oauthEscape(this._secrets.oauth_secret);
             if (this._parameters['oauth_signature_method'] == 'PLAINTEXT')
             {
                 return secretKey;
             }
             if (this._parameters['oauth_signature_method'] == 'HMAC-SHA1')
             {
-                var sigString = this._access+'&'+this._path+'&'+this._normalizedParameters();
+                var sigString = this._oauthEscape(this._access)+'&'+this._oauthEscape(this._path)+'&'+this._oauthEscape(this._normalizedParameters());
                 b64pad = "=";
                 return b64_hmac_sha1(secretKey,sigString);
             }
