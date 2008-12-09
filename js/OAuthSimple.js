@@ -105,7 +105,7 @@ if (OAuthSimple == null)
          */
         this.setParameters = function (parameters) {
             if (parameters == null)
-                throw ('No parameters specified for OAuthSimple.setParameters');
+                parameters = {};
             if (typeof(parameters) == 'string')
                 parameters=this._parseParameterString(parameters);
             this._parameters = parameters;
