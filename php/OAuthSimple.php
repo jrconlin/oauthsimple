@@ -42,7 +42,7 @@ class OAuthSimpleException extends Exception {}
 class OAuthSimple {
     var $_secrets;
     var $_default_signature_method;
-    var $_access;
+    var $_action;
     var $_nonce_chars;
 
     /* Simple OAuth
@@ -96,7 +96,7 @@ class OAuthSimple {
         if (!empty($sharedSecret))
             $this->_secrets{'shared_secret'}=$sharedSecret;
         $this->_default_signature_method="HMAC-SHA1";
-        $this->_access="GET";
+        $this->_action="GET";
         $this->_nonce_chars="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
         return $this;
     }
@@ -157,7 +157,7 @@ class OAuthSimple {
         $action = strtoupper($action);
         if (preg_match('/[^A-Z]/',$action))
             throw new OAuthSimpleException('Invalid action specified for OAuthSimple.setAction');
-        $this->action = $action;
+        $this->_action = $action;
         return $this;
     }
 
@@ -368,7 +368,7 @@ class OAuthSimple {
                 return $secretKey;
 
             case 'HMAC-SHA1':
-                $sigString = $this->_oauthEscape($this->_access).'&'.$this->_oauthEscape($this->_path).'&'.$this->_oauthEscape($this->_normalizedParameters());
+                $sigString = $this->_oauthEscape($this->_action).'&'.$this->_oauthEscape($this->_path).'&'.$this->_oauthEscape($this->_normalizedParameters());
                 return base64_encode(hash_hmac('sha1',$sigString,$secretKey,true));
 
             default:

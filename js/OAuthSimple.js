@@ -96,7 +96,7 @@ if (OAuthSimple == null)
         if (shared_secret != null)
             this._secrets['shared_secret'] = shared_secret;
         this._default_signature_method= "HMAC-SHA1";
-        this._access = "GET";
+        this._action = "GET";
         this._nonce_chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
         /** set the parameters either from a hash or a string
@@ -394,7 +394,7 @@ if (OAuthSimple == null)
             }
             if (this._parameters['oauth_signature_method'] == 'HMAC-SHA1')
             {
-                var sigString = this._oauthEscape(this._access)+'&'+this._oauthEscape(this._path)+'&'+this._oauthEscape(this._normalizedParameters());
+                var sigString = this._oauthEscape(this._action)+'&'+this._oauthEscape(this._path)+'&'+this._oauthEscape(this._normalizedParameters());
                 b64pad = "=";
                 return b64_hmac_sha1(secretKey,sigString);
             }
