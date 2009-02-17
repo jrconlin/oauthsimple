@@ -13,10 +13,10 @@
     // Some sample argument values
 
     // You can pass in arguments either as a string of URL characters:
-    $argumentsAsString = "term=rat&expand=formats,synopsis&max_results=1&boo=foo&boo=fie";
+    $argumentsAsString = "term=mac%20and+me&expand=formats,synopsis&max_results=1";
     //   or a hash:
     $argumentsAsObject = Array(
-        term=>'rat',
+        term=>'the prisoner',
         expand=>'formats,synopsis',
         max_results=> '1',
     );
@@ -57,8 +57,12 @@
         <h1>Test Document</h1>
         <ol>
             <li><a href="<?php print $sample1Results['signed_url'] ?>">First Link</a><br />
-            <?php print $sample1Results['signed_url'] ?></li>
-            <li><a href="<?php print $sample2Results['signed_url'] ?>">Second Link</a></li>
+            </li>
+            <li><a href="<?php print $sample2Results['signed_url'] ?>">Second Link</a>
+            <?php /*
+            <pre> <?php print_r($sample2Results); ?> </pre>
+            */ ?>
+            </li>
             <li><a href="<?php print $sample3Results['signed_url'] ?>">Third Link</a></li>
         </ol>
         <a href="index.phps">Source for index</a><br />

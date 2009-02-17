@@ -106,9 +106,13 @@ class OAuthSimple {
     * @param {string,object} List of parameters for the call, this can either be a URI string (e.g. "foo=bar&gorp=banana" or an object/hash)
     */
     function setParameters ($parameters=Array()) {
+        
         if (is_string($parameters))
             $parameters = $this->_parseParameterString($parameters);
-        $this->_parameters = $parameters;
+        if (empty($this->_parameters))
+            $this->_parameters = $parameters;
+        elseif (!empty($parameters))
+            $this->_parameters = array_merge($this->_parameters,$parameters);
         if (empty($this->_parameters[oauth_nonce]))
             $this->_getNonce();
         if (empty($this->_parameters[oauth_timestamp]))
@@ -119,7 +123,7 @@ class OAuthSimple {
             $this->_getAccessToken();
         if (empty($this->_parameters[oauth_signature_method]))
             $this->setSignatureMethod();
-
+        //error_log('parameters: '.print_r($this,1));
         return $this;
     }
 
@@ -290,6 +294,7 @@ class OAuthSimple {
             else
                 $result[$key]=$token;
         }
+        //error_log('Parse parameters : '.print_r($result,1));
         return $result;
     }
 
@@ -339,7 +344,7 @@ class OAuthSimple {
     }
 
     function _getTimeStamp() {
-        return $this->_parameters['oauth_timestamp'] = time();
+        return $this->_parameters['stamp'] = time();
     }
 
     function _normalizedParameters() {
@@ -371,6 +376,7 @@ class OAuthSimple {
 
             case 'HMAC-SHA1':
                 $sigString = $this->_oauthEscape($this->_action).'&'.$this->_oauthEscape($this->_path).'&'.$this->_oauthEscape($this->_normalizedParameters());
+                error_log('SBS: '.$sigString);
                 return base64_encode(hash_hmac('sha1',$sigString,$secretKey,true));
 
             default:
