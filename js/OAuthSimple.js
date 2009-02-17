@@ -280,19 +280,22 @@ if (OAuthSimple == null)
             for(var element=elements.shift();element;element=elements.shift())
             {
                 var keyToken=element.split('=');
+                var value='';
+                if (keyToken[1])
+                    value=decodeURIComponent(keyToken[1]);
                 if(result[keyToken[0]]){
                     if (!(result[keyToken[0]] instanceof Array))
                     {
-                        result[keyToken[0]] = Array(result[keyToken[0]],keyToken[1]);
+                        result[keyToken[0]] = Array(result[keyToken[0]],value);
                     }
                     else
                     {
-                        result[keyToken[0]].push(keyToken[1]);
+                        result[keyToken[0]].push(value);
                     }
                 }
                 else
                 {
-                    result[keyToken[0]]=keyToken[1];
+                    result[keyToken[0]]=value;
                 }
             }
             return result;

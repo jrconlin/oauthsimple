@@ -278,6 +278,8 @@ class OAuthSimple {
         foreach ($elements as $element)
         {
             list ($key,$token) = split('=',$element);
+            if ($token)
+                $token = urldecode($token);
             if (!empty($result[$key]))
             {
                 if (!is_array($result[$key]))
