@@ -344,7 +344,7 @@ class OAuthSimple {
     }
 
     function _getTimeStamp() {
-        return $this->_parameters['stamp'] = time();
+        return $this->_parameters['oauth_timestamp'] = time();
     }
 
     function _normalizedParameters() {
