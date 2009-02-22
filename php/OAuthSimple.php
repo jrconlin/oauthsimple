@@ -376,7 +376,7 @@ class OAuthSimple {
 
             case 'HMAC-SHA1':
                 $sigString = $this->_oauthEscape($this->_action).'&'.$this->_oauthEscape($this->_path).'&'.$this->_oauthEscape($this->_normalizedParameters());
-                error_log('SBS: '.$sigString);
+                //error_log('SBS: '.$sigString);
                 return base64_encode(hash_hmac('sha1',$sigString,$secretKey,true));
 
             default:
