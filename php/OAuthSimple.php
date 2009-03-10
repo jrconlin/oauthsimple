@@ -299,6 +299,8 @@ class OAuthSimple {
     }
 
     function _oauthEscape($string) {
+        if ($string == 0)
+            return 0;
         if (empty($string))
             return '';
         if (is_array($string))
