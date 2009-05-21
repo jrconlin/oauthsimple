@@ -46,8 +46,9 @@
             oauth.setParameters(argumentsAsString);
                 oauth.setPath(path);
                 var sample1Results = oauth.sign();
-            if (window.console != null)
+            try {
                 console.debug('Sample 1',sample1Results);
+            } catch(e) {};
 
             // Test 2 ===== the semi-easy way.
             var oauth2 = OAuthSimple(apiKey,sharedSecret);
@@ -55,8 +56,9 @@
                                              path:path,
                                              method:'HMAC-SHA1',
                                              parameters:argumentsAsObject});
-            if (window.console != null)
+            try {                                             
                 console.debug('Sample 2',sample2Results);
+            } catch (e) {};
 
             // Test 3 ===== the totally easy way.
             var sample3Results = OAuthSimple().sign({path:path,
@@ -64,8 +66,9 @@
                                                   signatures:{
                                                     'consumer_key':apiKey, 'shared_secret': sharedSecret,
                                                     'access_token':accessToken,'access_secret':tokenSecret}});
-            if (window.console != null)
+             try {
                 console.debug('Sample 3',sample3Results);
+                } catch (e) {};
 
             // Now fill out the samples with our handiwork:
             document.getElementById('sample1').href = sample1Results.signed_url;

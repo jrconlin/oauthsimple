@@ -305,11 +305,11 @@ if (OAuthSimple == null)
             {
                 throw('Array passed to _oauthEscape');
             }
-            return encodeURIComponent(string).replace("!", "%21", "g").
-            replace("*", "%2A", "g").
-            replace("'", "%27", "g").
-            replace("(", "%28", "g").
-            replace(")", "%29", "g");
+            return encodeURIComponent(string).replace(/\!/g, "%21").
+            replace(/\*/g, "%2A").
+            replace(/'/g, "%27").
+            replace(/\(/g, "%28").
+            replace(/\)/g, "%29");
         };
 
         this._getNonce = function (length) {
