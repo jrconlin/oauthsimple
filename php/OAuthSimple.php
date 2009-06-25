@@ -5,10 +5,10 @@
   * author:     jr conlin
   * mail:       src@anticipatr.com
   * copyright:  unitedHeroes.net
-  * version:    0.2 (Not Ready For Prime Time)
+  * version:    1.0
   * url:        http://unitedHeroes.net/OAuthSimple
   *
-  * Copyright (c) 2008, unitedHeroes.net
+  * Copyright (c) 2009, unitedHeroes.net
   * All rights reserved.
   *
   * Redistribution and use in source and binary forms, with or without
@@ -69,14 +69,14 @@ class OAuthSimple {
        <code>
        <?php
         $oauthObject = new OAuthSimple();
-        $result = $oauthObject->sign(Array(path=>'http://example.com/rest/',
-                                           parameters=> 'foo=bar&gorp=banana',
-                                           signatures=> Array(
-                                                api_key=>'12345abcd',
-                                                shared_secret=>'xyz-5309'
+        $result = $oauthObject->sign(Array('path'=>'http://example.com/rest/',
+                                           'parameters'=> 'foo=bar&gorp=banana',
+                                           'signatures'=> Array(
+                                                'api_key'=>'12345abcd',
+                                                'shared_secret'=>'xyz-5309'
                                              )));
         ?>
-        <a href="<?php print $result->signed_url; ?>">Some Link</a>;
+        <a href="<?php print $result['signed_url']; ?>">Some Link</a>;
        </code>
      *
      * that will sign as a "GET" using "SHA1-MAC" the url. If you need more than
@@ -113,15 +113,15 @@ class OAuthSimple {
             $this->_parameters = $parameters;
         elseif (!empty($parameters))
             $this->_parameters = array_merge($this->_parameters,$parameters);
-        if (empty($this->_parameters[oauth_nonce]))
+        if (empty($this->_parameters['oauth_nonce']))
             $this->_getNonce();
-        if (empty($this->_parameters[oauth_timestamp]))
+        if (empty($this->_parameters['oauth_timestamp']))
             $this->_getTimeStamp();
-        if (empty($this->_parameters[oauth_consumer_key]))
+        if (empty($this->_parameters['oauth_consumer_key']))
             $this->_getApiKey();
-        if (empty($this->_parameters[oauth_token]))
+        if (empty($this->_parameters['oauth_token']))
             $this->_getAccessToken();
-        if (empty($this->_parameters[oauth_signature_method]))
+        if (empty($this->_parameters['oauth_signature_method']))
             $this->setSignatureMethod();
         //error_log('parameters: '.print_r($this,1));
         return $this;
@@ -176,11 +176,11 @@ class OAuthSimple {
             foreach ($signatures as $sig=>$value)
                 $this->_secrets[$sig] = $value;
         // Aliases
-        if ($this->_secrets['api_key'])
+        if (isset($this->_secrets['api_key']))
             $this->_secrets['consumer_key'] = $this->_secrets['api_key'];
-        if ($this->_secrets['access_token'])
+        if (isset($this->_secrets['access_token']))
             $this->_secrets['oauth_token'] = $this->_secrets['access_token'];
-        if ($this->_secrets['access_secret'])
+	if (isset($this->_secrets['access_secret']))
             $this->_secrets['oauth_secret'] = $this->_secrets['access_secret'];
         // Gauntlet
         if (empty($this->_secrets['consumer_key']))
@@ -189,7 +189,7 @@ class OAuthSimple {
             throw new OAuthSimpleException('Missing requires shared_secret in OAuthSimple.setTokensAndSecrets');
         if (!empty($this->_secrets['oauth_token']) && empty($this->_secrets[oauth_secret]))
             throw new OAuthSimpleException('Missing oauth_secret for supplied oauth_token in OAuthSimple.setTokensAndSecrets');
-        return this;
+        return $this;
     }
 
     /** set the signature method (currently only Plaintext or SHA-MAC1)
@@ -222,21 +222,21 @@ class OAuthSimple {
     *                   all arguments are optional.
     */
     function sign($args=array()) {
-        if (!empty($args[action]))
-            $this->setAction($args[action]);
-        if (!empty($args[path]))
-            $this->setPath($args[path]);
-        if (!empty($args[method]))
-            $this->setSignatureMethod($args[method]);
-        $this->setTokensAndSecrets($args[signatures]);
-        $this->setParameters($args[parameters]);
+        if (!empty($args['action']))
+            $this->setAction($args['action']);
+        if (!empty($args['path']))
+            $this->setPath($args['path']);
+        if (!empty($args['method']))
+            $this->setSignatureMethod($args['method']);
+        $this->setTokensAndSecrets($args['signatures']);
+        $this->setParameters($args['parameters']);
         $normParams = $this->_normalizedParameters();
         $this->_parameters['oauth_signature'] = $this->_generateSignature($normParams);
         return Array(
-            parameters => $this->_parameters,
-            signature => $this->_oauthEscape($this->_parameters['oauth_signature']),
-            signed_url => $this->_path . '?' . $this->_normalizedParameters(),
-            header => $this->getHeaderString(),
+            'parameters' => $this->_parameters,
+            'signature' => $this->_oauthEscape($this->_parameters['oauth_signature']),
+            'signed_url' => $this->_path . '?' . $this->_normalizedParameters(),
+            'header' => $this->getHeaderString(),
         );
     }
 
@@ -337,9 +337,9 @@ class OAuthSimple {
     }
 
     function _getAccessToken() {
-        if ($this->_secrets['oauth_secret'] == null)
+        if (!isset($this->_secrets['oauth_secret']))
             return '';
-        if ($this->_secrets['oauth_token'] == null)
+        if (!isset($this->_secrets['oauth_token']))
             throw new OAuthSimpleException('No access token (oauth_token) set for OAuthSimple.');
         $this->_parameters['oauth_token'] = $this->_secrets['oauth_token'];
         return $this->_parameters['oauth_token'];
@@ -369,8 +369,12 @@ class OAuthSimple {
     }
 
     function _generateSignature () {
-        $secretKey = $this->_oauthEscape($this->_secrets['shared_secret']) .
-            '&' . $this->_oauthEscape($this->_secrets['oauth_secret']);
+        $secretKey = '';
+	if(isset($this->_secrets['shared_secret']))
+	    $secretKey = $this->_oauthEscape($this->_secrets['shared_secret']);
+	$secretKey .= '&';
+	if(isset($this->_secrets['oauth_secret']))
+            $secretKey .= $this->_oauthEscape($this->_secrets['oauth_secret']);
         switch($this->_parameters['oauth_signature_method'])
         {
             case 'PLAINTEXT':
