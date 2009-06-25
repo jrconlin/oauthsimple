@@ -7,7 +7,7 @@
   * version:    1.0 
   * url:        http://unitedHeroes.net/OAuthSimple
   *
-  * Copyright (c) 2008, unitedHeroes.net
+  * Copyright (c) 2009, unitedHeroes.net
   * All rights reserved.
   *
   * Redistribution and use in source and binary forms, with or without
