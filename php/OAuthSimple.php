@@ -123,6 +123,8 @@ class OAuthSimple {
             $this->_getAccessToken();
         if (empty($this->_parameters['oauth_signature_method']))
             $this->setSignatureMethod();
+        if (empty($this->_parameters['oauth_version']))
+            $this->_parameters['oauth_version']="1.0";
         //error_log('parameters: '.print_r($this,1));
         return $this;
     }
@@ -187,7 +189,7 @@ class OAuthSimple {
             throw new OAuthSimpleException('Missing required consumer_key in OAuthSimple.setTokensAndSecrets');
         if (empty($this->_secrets['shared_secret']))
             throw new OAuthSimpleException('Missing requires shared_secret in OAuthSimple.setTokensAndSecrets');
-        if (!empty($this->_secrets['oauth_token']) && empty($this->_secrets[oauth_secret]))
+        if (!empty($this->_secrets['oauth_token']) && empty($this->_secrets['oauth_secret']))
             throw new OAuthSimpleException('Missing oauth_secret for supplied oauth_token in OAuthSimple.setTokensAndSecrets');
         return $this;
     }
@@ -228,8 +230,10 @@ class OAuthSimple {
             $this->setPath($args['path']);
         if (!empty($args['method']))
             $this->setSignatureMethod($args['method']);
-        $this->setTokensAndSecrets($args['signatures']);
-        $this->setParameters($args['parameters']);
+        if (!empty($args['signatures']))
+            $this->setTokensAndSecrets($args['signatures']);
+        if (!empty($args['parameters']))
+            $this->setParameters($args['parameters']);
         $normParams = $this->_normalizedParameters();
         $this->_parameters['oauth_signature'] = $this->_generateSignature($normParams);
         return Array(
@@ -237,7 +241,8 @@ class OAuthSimple {
             'signature' => $this->_oauthEscape($this->_parameters['oauth_signature']),
             'signed_url' => $this->_path . '?' . $this->_normalizedParameters(),
             'header' => $this->getHeaderString(),
-        );
+            'sbs'=> $this->sbs
+            );
     }
 
     /** Return a formatted "header" string
@@ -381,9 +386,9 @@ class OAuthSimple {
                 return $secretKey;
 
             case 'HMAC-SHA1':
-                $sigString = $this->_oauthEscape($this->_action).'&'.$this->_oauthEscape($this->_path).'&'.$this->_oauthEscape($this->_normalizedParameters());
+                $this->sbs = $this->_oauthEscape($this->_action).'&'.$this->_oauthEscape($this->_path).'&'.$this->_oauthEscape($this->_normalizedParameters());
                 //error_log('SBS: '.$sigString);
-                return base64_encode(hash_hmac('sha1',$sigString,$secretKey,true));
+                return base64_encode(hash_hmac('sha1',$this->sbs,$secretKey,true));
 
             default:
                 throw new OAuthSimpleException('Unknown signature method for OAuthSimple');

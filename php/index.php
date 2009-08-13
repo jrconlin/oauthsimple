@@ -1,6 +1,7 @@
 <?php
     include ('./OAuthSimple.php');
     include ('./config.inc'); // Private configuration values
+error_reporting(E_ALL);
     /* 
         Defined in config.inc
         
@@ -16,9 +17,9 @@
     $argumentsAsString = "term=mac%20and+me&expand=formats,synopsis&max_results=1";
     //   or a hash:
     $argumentsAsObject = Array(
-        term=>'the prisoner',
-        expand=>'formats,synopsis',
-        max_results=> '1',
+        'term'=>'the prisoner',
+        'expand'=>'formats,synopsis',
+        'max_results'=> '1',
     );
 
     $path = "http://api.netflix.com/catalog/titles";
@@ -34,17 +35,18 @@
 
     $oauth=null;
     $oauth = new OAuthSimple($apiKey,$sharedSecret);
-    $sample2Results = $oauth->sign(Array(action=>'GET',
-                                         path=>$path,
-                                         method=>'HMAC-SHA1',
-                                         parameters=>$argumentsAsObject));
+    $sample2Results = $oauth->sign(Array('action'=>'GET',
+                                         'path'=>$path,
+                                         'method'=>'HMAC-SHA1',
+                                         'parameters'=>$argumentsAsObject));
 
     # Test 3 ======
 
     $oauth = new OAuthSimple();
-    $sample3Results = $oauth->sign(Array(path=>$path,
-                    parameters=>$argumentsAsObject,
-                    signatures=> Array('consumer_key'=>$apiKey,
+    $sample3Results = $oauth->sign(Array('path'=>'http://api.netflix.com/catalog/people',
+                    'parameters'=>Array('term'=>'Harrison Ford',
+                                      'max_results'=>'5'),
+                    'signatures'=> Array('consumer_key'=>$apiKey,
                                         'shared_secret'=>$sharedSecret,
                                         'access_token'=>$accessToken,
                                         'access_secret'=>$tokenSecret)));
