@@ -34,7 +34,7 @@
  */
 var OAuthSimple;
 
-if (OAuthSimple == null)
+if (OAuthSimple === null)
 {
     /* Simple OAuth
      *
@@ -88,10 +88,12 @@ if (OAuthSimple == null)
 
 
         // General configuration options.
-        if (consumer_key != null)
-            this._secrets['consumer_key'] = consumer_key;
-        if (shared_secret != null)
-            this._secrets['shared_secret'] = shared_secret;
+        if (consumer_key !== null) {
+            this._secrets['consumer_key'] = consumer_key; 
+            }
+        if (shared_secret !== null) {
+            this._secrets['shared_secret'] = shared_secret; 
+            }
         this._default_signature_method= "HMAC-SHA1";
         this._action = "GET";
         this._nonce_chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -101,21 +103,28 @@ if (OAuthSimple == null)
          * @param {string,object} List of parameters for the call, this can either be a URI string (e.g. "foo=bar&gorp=banana" or an object/hash)
          */
         this.setParameters = function (parameters) {
-            if (parameters == null)
+            if (parameters === null) {
                 parameters = {};
-            if (typeof(parameters) == 'string')
-                parameters=this._parseParameterString(parameters);
+                }
+            if (typeof(parameters) == 'string') {
+                parameters=this._parseParameterString(parameters); 
+                }
             this._parameters = parameters;
-            if (this._parameters['oauth_nonce'] == null)
+            if (this._parameters['oauth_nonce'] === null) {
                 this._getNonce();
-            if (this._parameters['oauth_timestamp'] == null)
+                }
+            if (this._parameters['oauth_timestamp'] === null) {
                 this._getTimestamp();
-            if (this._parameters['oauth_method'] == null)
+                }
+            if (this._parameters['oauth_method'] === null) {
                 this.setSignatureMethod();
-            if (this._parameters['oauth_consumer_key'] == null)
+                }
+            if (this._parameters['oauth_consumer_key'] === null) {
                 this._getApiKey();
-            if(this._parameters['oauth_token'] == null)
+                }
+            if(this._parameters['oauth_token'] === null) {
                 this._getAccessToken();
+                }
 
             return this;
         };
@@ -133,8 +142,9 @@ if (OAuthSimple == null)
          * @param path {string} the fully qualified URI (excluding query arguments) (e.g "http://example.org/foo")
          */
         this.setURL = function (path) {
-            if (path == '')
+            if (path == '') {
                 throw ('No path specified for OAuthSimple.setURL');
+                }
             this._path = path;
             return this;
         };
@@ -152,11 +162,13 @@ if (OAuthSimple == null)
          * @param action {string} HTTP Action word.
          */
         this.setAction = function(action) {
-            if (action == null)
+            if (action === null) {
                 action="GET";
+                }
             action = action.toUpperCase();
-            if (action.match('[^A-Z]'))
+            if (action.match('[^A-Z]')) {
                 throw ('Invalid action specified for OAuthSimple.setAction');
+                }
             this._action = action;
             return this;
         };
@@ -167,22 +179,31 @@ if (OAuthSimple == null)
          */
         this.setTokensAndSecrets = function(signatures) {
             if (signatures)
-                for (var i in signatures)
+            {
+                for (var i in signatures) {
                     this._secrets[i] = signatures[i];
+                    }
+            }
             // Aliases
-            if (this._secrets['api_key'])
+            if (this._secrets['api_key']) {
                 this._secrets.consumer_key = this._secrets.api_key;
-            if (this._secrets['access_token'])
+                }
+            if (this._secrets['access_token']) {
                 this._secrets.oauth_token = this._secrets.access_token;
-            if (this._secrets['access_secret'])
+                }
+            if (this._secrets['access_secret']) {
                 this._secrets.oauth_secret = this._secrets.access_secret;
+                }
             // Gauntlet
-            if (this._secrets.consumer_key == null)
+            if (this._secrets.consumer_key === null) {
                 throw('Missing required consumer_key in OAuthSimple.setTokensAndSecrets');
-            if (this._secrets.shared_secret == null)
+                }
+            if (this._secrets.shared_secret === null) {
                 throw('Missing required shared_secret in OAuthSimple.setTokensAndSecrets');
-            if ((this._secrets.oauth_token!=null) && (this._secrets.oauth_secret == null))
+                }
+            if ((this._secrets.oauth_token !== null) && (this._secrets.oauth_secret === null)) {
                 throw('Missing oauth_secret for supplied oauth_token in OAuthSimple.setTokensAndSecrets');
+                }
             return this;
         };
 
@@ -191,11 +212,13 @@ if (OAuthSimple == null)
          * @param method {string} Method of signing the transaction (only PLAINTEXT and SHA-MAC1 allowed for now)
          */
         this.setSignatureMethod = function(method) {
-            if (method == null)
+            if (method === null) {
                 method = this._default_signature_method;
+                }
             //TODO: accept things other than PlainText or SHA-MAC1
-            if (method.toUpperCase().match(/(PLAINTEXT|HMAC-SHA1)/) == null)
+            if (method.toUpperCase().match(/(PLAINTEXT|HMAC-SHA1)/) === null) {
                 throw ('Unknown signing method specified for OAuthSimple.setSignatureMethod');
+                }
             this._parameters['oauth_signature_method']= method.toUpperCase();
             return this;
         };
@@ -210,18 +233,23 @@ if (OAuthSimple == null)
          *                   all arguments are optional.
          */
         this.sign = function (args) {
-            if (args == null)
+            if (args === null) {
                 args = {};
+                }
             // Set any given parameters
-            if(args['action'] != null)
+            if(args['action'] !== null) {
                 this.setAction(args['action']);
-            if (args['path'] != null)
+                }
+            if (args['path'] !== null) {
                 this.setPath(args['path']);
-            if (args['method'] != null)
+                }
+            if (args['method'] !== null) {
                 this.setSignatureMethod(args['method']);
+                }
             this.setTokensAndSecrets(args['signatures']);
-            if (args['parameters'] != null)
+            if (args['parameters'] !== null){
             this.setParameters(args['parameters']);
+            }
             // check the parameters
             var normParams = this._normalizedParameters();
             this._parameters['oauth_signature']=this._generateSignature(normParams);
@@ -242,14 +270,16 @@ if (OAuthSimple == null)
          * @param args {object} see .sign
          */
         this.getHeaderString = function(args) {
-            if (this._parameters['oauth_signature'] == null)
+            if (this._parameters['oauth_signature'] === null) {
                 this.sign(args);
+                }
 
             var result = 'OAuth ';
             for (var pName in this._parameters)
             {
-                if (pName.match(/^oauth/) == null)
+                if (pName.match(/^oauth/) === null) {
                     continue;
+                    }
                 if ((this._parameters[pName]) instanceof Array)
                 {
                     var pLength = this._parameters[pName].length;
@@ -278,8 +308,9 @@ if (OAuthSimple == null)
             {
                 var keyToken=element.split('=');
                 var value='';
-                if (keyToken[1])
+                if (keyToken[1]) {
                     value=decodeURIComponent(keyToken[1]);
+                    }
                 if(result[keyToken[0]]){
                     if (!(result[keyToken[0]] instanceof Array))
                     {
@@ -299,8 +330,9 @@ if (OAuthSimple == null)
         };
 
         this._oauthEscape = function(string) {
-            if (string == null)
+            if (string === null) {
                 return "";
+                }
             if (string instanceof Array)
             {
                 throw('Array passed to _oauthEscape');
@@ -313,8 +345,9 @@ if (OAuthSimple == null)
         };
 
         this._getNonce = function (length) {
-            if (length == null)
+            if (length === null) {
                 length=5;
+                }
             var result = "";
             var cLength = this._nonce_chars.length;
             for (var i = 0; i < length;i++) {
@@ -326,17 +359,20 @@ if (OAuthSimple == null)
         };
 
         this._getApiKey = function() {
-            if (this._secrets.consumer_key == null)
+            if (this._secrets.consumer_key === null) {
                 throw('No consumer_key set for OAuthSimple.');
+                }
             this._parameters['oauth_consumer_key']=this._secrets.consumer_key;
             return this._parameters.oauth_consumer_key;
         };
 
         this._getAccessToken = function() {
-            if (this._secrets['oauth_secret'] == null)
+            if (this._secrets['oauth_secret'] === null) {
                 return '';
-            if (this._secrets['oauth_token'] == null)
+                }
+            if (this._secrets['oauth_token'] === null) {
                 throw('No oauth_token (access_token) set for OAuthSimple.');
+                }
             this._parameters['oauth_token'] = this._secrets.oauth_token;
             return this._parameters.oauth_token;
         };
@@ -361,8 +397,9 @@ if (OAuthSimple == null)
             var ra =0;
             for (var paramName in this._parameters)
             {
-                if (ra++ > 1000)
+                if (ra++ > 1000) {
                     throw('runaway 1');
+                    }
                 paramNames.unshift(paramName);
             }
             paramNames = paramNames.sort();
@@ -371,15 +408,17 @@ if (OAuthSimple == null)
             {
                 paramName=paramNames[i];
                 //skip secrets.
-                if (paramName.match(/\w+_secret/))
+                if (paramName.match(/\w+_secret/)) {
                     continue;
+                    }
                 if (this._parameters[paramName] instanceof Array)
                 {
                     var sorted = this._parameters[paramName].sort();
                     var spLen = sorted.length;
                     for (var j = 0;j<spLen;j++){
-                        if (ra++ > 1000)
+                        if (ra++ > 1000) {
                             throw('runaway 1');
+                            }
                         elements.push(this._oauthEscape(paramName) + '=' +
                                   this._oauthEscape(sorted[j]));
                     }
