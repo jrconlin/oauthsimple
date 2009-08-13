@@ -101,6 +101,15 @@ class OAuthSimple {
         return $this;
     }
 
+    /** reset the parameters and url 
+    *
+    */
+    function reset() {
+        $this->_parameters=null;
+        $this->path=null;
+        return $this;    
+    }
+
     /** set the parameters either from a hash or a string
     *
     * @param {string,object} List of parameters for the call, this can either be a URI string (e.g. "foo=bar&gorp=banana" or an object/hash)
