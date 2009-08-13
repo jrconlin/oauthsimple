@@ -34,7 +34,7 @@
  */
 var OAuthSimple;
 
-if (OAuthSimple === null)
+if (OAuthSimple === undefined)
 {
     /* Simple OAuth
      *
@@ -80,49 +80,56 @@ if (OAuthSimple === null)
      */
     OAuthSimple = function (consumer_key,shared_secret)
     {
-/*        if (api_key == null)
+/*        if (api_key == undefined)
             throw("Missing argument: api_key (oauth_consumer_key) for OAuthSimple. This is usually provided by the hosting site.");
-        if (shared_secret == null)
+        if (shared_secret == undefined)
             throw("Missing argument: shared_secret (shared secret) for OAuthSimple. This is usually provided by the hosting site.");
 */      this._secrets={};
 
 
         // General configuration options.
-        if (consumer_key !== null) {
+        if (consumer_key !== undefined) {
             this._secrets['consumer_key'] = consumer_key; 
             }
-        if (shared_secret !== null) {
+        if (shared_secret !== undefined) {
             this._secrets['shared_secret'] = shared_secret; 
             }
         this._default_signature_method= "HMAC-SHA1";
         this._action = "GET";
         this._nonce_chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
+
+        this.reset = function() {
+            this.setParameters(null);
+            this._path=null;
+            return this;
+        };
+
         /** set the parameters either from a hash or a string
          *
          * @param {string,object} List of parameters for the call, this can either be a URI string (e.g. "foo=bar&gorp=banana" or an object/hash)
          */
         this.setParameters = function (parameters) {
-            if (parameters === null) {
+            if (parameters === undefined) {
                 parameters = {};
                 }
             if (typeof(parameters) == 'string') {
                 parameters=this._parseParameterString(parameters); 
                 }
             this._parameters = parameters;
-            if (this._parameters['oauth_nonce'] === null) {
+            if (this._parameters['oauth_nonce'] === undefined) {
                 this._getNonce();
                 }
-            if (this._parameters['oauth_timestamp'] === null) {
+            if (this._parameters['oauth_timestamp'] === undefined) {
                 this._getTimestamp();
                 }
-            if (this._parameters['oauth_method'] === null) {
+            if (this._parameters['oauth_method'] === undefined) {
                 this.setSignatureMethod();
                 }
-            if (this._parameters['oauth_consumer_key'] === null) {
+            if (this._parameters['oauth_consumer_key'] === undefined) {
                 this._getApiKey();
                 }
-            if(this._parameters['oauth_token'] === null) {
+            if(this._parameters['oauth_token'] === undefined) {
                 this._getAccessToken();
                 }
 
@@ -162,7 +169,7 @@ if (OAuthSimple === null)
          * @param action {string} HTTP Action word.
          */
         this.setAction = function(action) {
-            if (action === null) {
+            if (action === undefined) {
                 action="GET";
                 }
             action = action.toUpperCase();
@@ -195,13 +202,13 @@ if (OAuthSimple === null)
                 this._secrets.oauth_secret = this._secrets.access_secret;
                 }
             // Gauntlet
-            if (this._secrets.consumer_key === null) {
+            if (this._secrets.consumer_key === undefined) {
                 throw('Missing required consumer_key in OAuthSimple.setTokensAndSecrets');
                 }
-            if (this._secrets.shared_secret === null) {
+            if (this._secrets.shared_secret === undefined) {
                 throw('Missing required shared_secret in OAuthSimple.setTokensAndSecrets');
                 }
-            if ((this._secrets.oauth_token !== null) && (this._secrets.oauth_secret === null)) {
+            if ((this._secrets.oauth_token !== undefined) && (this._secrets.oauth_secret === undefined)) {
                 throw('Missing oauth_secret for supplied oauth_token in OAuthSimple.setTokensAndSecrets');
                 }
             return this;
@@ -212,11 +219,11 @@ if (OAuthSimple === null)
          * @param method {string} Method of signing the transaction (only PLAINTEXT and SHA-MAC1 allowed for now)
          */
         this.setSignatureMethod = function(method) {
-            if (method === null) {
+            if (method === undefined) {
                 method = this._default_signature_method;
                 }
             //TODO: accept things other than PlainText or SHA-MAC1
-            if (method.toUpperCase().match(/(PLAINTEXT|HMAC-SHA1)/) === null) {
+            if (method.toUpperCase().match(/(PLAINTEXT|HMAC-SHA1)/) === undefined) {
                 throw ('Unknown signing method specified for OAuthSimple.setSignatureMethod');
                 }
             this._parameters['oauth_signature_method']= method.toUpperCase();
@@ -233,21 +240,21 @@ if (OAuthSimple === null)
          *                   all arguments are optional.
          */
         this.sign = function (args) {
-            if (args === null) {
+            if (args === undefined) {
                 args = {};
                 }
             // Set any given parameters
-            if(args['action'] !== null) {
+            if(args['action'] !== undefined) {
                 this.setAction(args['action']);
                 }
-            if (args['path'] !== null) {
+            if (args['path'] !== undefined) {
                 this.setPath(args['path']);
                 }
-            if (args['method'] !== null) {
+            if (args['method'] !== undefined) {
                 this.setSignatureMethod(args['method']);
                 }
             this.setTokensAndSecrets(args['signatures']);
-            if (args['parameters'] !== null){
+            if (args['parameters'] !== undefined){
             this.setParameters(args['parameters']);
             }
             // check the parameters
@@ -270,14 +277,14 @@ if (OAuthSimple === null)
          * @param args {object} see .sign
          */
         this.getHeaderString = function(args) {
-            if (this._parameters['oauth_signature'] === null) {
+            if (this._parameters['oauth_signature'] === undefined) {
                 this.sign(args);
                 }
 
             var result = 'OAuth ';
             for (var pName in this._parameters)
             {
-                if (pName.match(/^oauth/) === null) {
+                if (pName.match(/^oauth/) === undefined) {
                     continue;
                     }
                 if ((this._parameters[pName]) instanceof Array)
@@ -330,7 +337,7 @@ if (OAuthSimple === null)
         };
 
         this._oauthEscape = function(string) {
-            if (string === null) {
+            if (string === undefined) {
                 return "";
                 }
             if (string instanceof Array)
@@ -345,7 +352,7 @@ if (OAuthSimple === null)
         };
 
         this._getNonce = function (length) {
-            if (length === null) {
+            if (length === undefined) {
                 length=5;
                 }
             var result = "";
@@ -359,7 +366,7 @@ if (OAuthSimple === null)
         };
 
         this._getApiKey = function() {
-            if (this._secrets.consumer_key === null) {
+            if (this._secrets.consumer_key === undefined) {
                 throw('No consumer_key set for OAuthSimple.');
                 }
             this._parameters['oauth_consumer_key']=this._secrets.consumer_key;
@@ -367,10 +374,10 @@ if (OAuthSimple === null)
         };
 
         this._getAccessToken = function() {
-            if (this._secrets['oauth_secret'] === null) {
+            if (this._secrets['oauth_secret'] === undefined) {
                 return '';
                 }
-            if (this._secrets['oauth_token'] === null) {
+            if (this._secrets['oauth_token'] === undefined) {
                 throw('No oauth_token (access_token) set for OAuthSimple.');
                 }
             this._parameters['oauth_token'] = this._secrets.oauth_token;
@@ -447,5 +454,5 @@ if (OAuthSimple === null)
         };
 
     return this;
-    }
+    };
 }
