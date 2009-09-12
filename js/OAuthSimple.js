@@ -100,8 +100,8 @@ if (OAuthSimple === undefined)
 
 
         this.reset = function() {
-            this.setParameters(null);
-            this._path=null;
+            this._parameters={};
+            this._path=undefined;
             return this;
         };
 
