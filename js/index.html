@@ -29,12 +29,11 @@
             var tokenSecret = "N0sOuP4U";
 
             var path="http://api.netflix.com/catalog/titles"
-            var argumentsAsString = "term=rat&expand=formats,synopsis&max_results=1";
+            var argumentsAsString = "term=rat&expand=format,synopsis&max_results=1";
             var argumentsAsObject = {
                 term:'rat',
                 expand:'formats,synopsis',
-                max_results: '1',
-                boo: ['foo','bar']      //there are some webapps that take an array this way.
+                max_results: '1' 
             };
 
             if (apiKey == "nO-woRk")
@@ -51,6 +50,7 @@
             } catch(e) {};
 
             // Test 2 ===== the semi-easy way.
+            OAuthSimple().reset();
             var oauth2 = OAuthSimple(apiKey,sharedSecret);
             var sample2Results = oauth2.sign({action:'GET',
                                              path:path,
@@ -61,8 +61,9 @@
             } catch (e) {};
 
             // Test 3 ===== the totally easy way.
+            OAuthSimple().reset();
             var sample3Results = OAuthSimple().sign({path:path,
-                                                  parameters:argumentsAsObject,
+                                                  parameters:argumentsAsString,
                                                   signatures:{
                                                     'consumer_key':apiKey, 'shared_secret': sharedSecret,
                                                     'access_token':accessToken,'access_secret':tokenSecret}});
