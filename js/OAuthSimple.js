@@ -132,7 +132,7 @@ if (OAuthSimple === undefined)
             if(this._parameters['oauth_token'] === undefined) {
                 this._getAccessToken();
                 }
-            if(this>_parameters['oauth_version'] === undefined) {
+            if(this._parameters['oauth_version'] === undefined) {
                 this._parameters['oauth_version']=='1.0';
                 }
 
