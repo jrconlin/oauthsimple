@@ -132,6 +132,9 @@ if (OAuthSimple === undefined)
             if(this._parameters['oauth_token'] === undefined) {
                 this._getAccessToken();
                 }
+            if(this>_parameters['oauth_version'] === undefined) {
+                this._parameters['oauth_version']=='1.0';
+                }
 
             return this;
         };
@@ -200,6 +203,9 @@ if (OAuthSimple === undefined)
                 }
             if (this._secrets['access_secret']) {
                 this._secrets.oauth_secret = this._secrets.access_secret;
+                }
+            if (this._secrets['oauth_token_secret']) {
+                this._secrets.oauth_secret = this._secrets.oauth_token_secret;
                 }
             // Gauntlet
             if (this._secrets.consumer_key === undefined) {
@@ -281,16 +287,16 @@ if (OAuthSimple === undefined)
                 this.sign(args);
                 }
 
-            var result = 'OAuth ';
-            for (var pName in this._parameters)
+            var j,pName,pLength,result = 'OAuth ';
+            for (pName in this._parameters)
             {
                 if (pName.match(/^oauth/) === undefined) {
                     continue;
                     }
                 if ((this._parameters[pName]) instanceof Array)
                 {
-                    var pLength = this._parameters[pName].length;
-                    for (var j=0;j<pLength;j++)
+                    pLength = this._parameters[pName].length;
+                    for (j=0;j<pLength;j++)
                     {
                         result += pName +'="'+this._oauthEscape(this._parameters[pName][j])+'" ';
                     }
@@ -309,12 +315,13 @@ if (OAuthSimple === undefined)
          *
          */
         this._parseParameterString = function(paramString){
-            var elements = paramString.split('&');
-            var result={};
-            for(var element=elements.shift();element;element=elements.shift())
+            var elements = paramString.split('&'),
+                result={},
+                element;
+            for(element=elements.shift();element;element=elements.shift())
             {
-                var keyToken=element.split('=');
-                var value='';
+                var keyToken=element.split('='),
+                    value='';
                 if (keyToken[1]) {
                     value=decodeURIComponent(keyToken[1]);
                     }
@@ -355,22 +362,22 @@ if (OAuthSimple === undefined)
             if (length === undefined) {
                 length=5;
                 }
-            var result = "";
-            var cLength = this._nonce_chars.length;
-            for (var i = 0; i < length;i++) {
-                var rnum = Math.floor(Math.random() *cLength);
+            var result = "",
+                i=0,
+                rnum,
+                cLength = this._nonce_chars.length;
+            for (;i<length;i++) {
+                rnum = Math.floor(Math.random()*cLength);
                 result += this._nonce_chars.substring(rnum,rnum+1);
             }
-            this._parameters['oauth_nonce']=result;
-            return result;
+            return this._parameters['oauth_nonce']=result;
         };
 
         this._getApiKey = function() {
             if (this._secrets.consumer_key === undefined) {
                 throw('No consumer_key set for OAuthSimple.');
                 }
-            this._parameters['oauth_consumer_key']=this._secrets.consumer_key;
-            return this._parameters.oauth_consumer_key;
+            return this._parameters['oauth_consumer_key']=this._secrets.consumer_key;
         };
 
         this._getAccessToken = function() {
@@ -380,15 +387,12 @@ if (OAuthSimple === undefined)
             if (this._secrets['oauth_token'] === undefined) {
                 throw('No oauth_token (access_token) set for OAuthSimple.');
                 }
-            this._parameters['oauth_token'] = this._secrets.oauth_token;
-            return this._parameters.oauth_token;
+            return this._parameters['oauth_token'] = this._secrets.oauth_token;
         };
 
         this._getTimestamp = function() {
-            var d = new Date();
-            var ts = Math.floor(d.getTime()/1000);
-            this._parameters['oauth_timestamp'] = ts;
-            return ts;
+            var ts = Math.floor((new Date()).getTime()/1000);
+            return this._parameters['oauth_timestamp'] = ts;
         };
 
         this.b64_hmac_sha1 = function(k,d,_p,_z){
@@ -399,9 +403,10 @@ if (OAuthSimple === undefined)
                                                      
 
         this._normalizedParameters = function() {
-            var elements = new Array();
-            var paramNames = [];
-            var ra =0;
+            var elements = new Array(),
+                paramNames = [],
+                i=0,
+                ra =0;
             for (var paramName in this._parameters)
             {
                 if (ra++ > 1000) {
@@ -411,7 +416,7 @@ if (OAuthSimple === undefined)
             }
             paramNames = paramNames.sort();
             pLen = paramNames.length;
-            for (var i=0;i<pLen; i++)
+            for (;i<pLen; i++)
             {
                 paramName=paramNames[i];
                 //skip secrets.
@@ -420,9 +425,10 @@ if (OAuthSimple === undefined)
                     }
                 if (this._parameters[paramName] instanceof Array)
                 {
-                    var sorted = this._parameters[paramName].sort();
-                    var spLen = sorted.length;
-                    for (var j = 0;j<spLen;j++){
+                    var sorted = this._parameters[paramName].sort(),
+                        spLen = sorted.length,
+                        j=0;
+                    for (;j<spLen;j++){
                         if (ra++ > 1000) {
                             throw('runaway 1');
                             }
