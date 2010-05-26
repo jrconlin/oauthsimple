@@ -191,8 +191,10 @@ class OAuthSimple {
             $this->_secrets['consumer_key'] = $this->_secrets['api_key'];
         if (isset($this->_secrets['access_token']))
             $this->_secrets['oauth_token'] = $this->_secrets['access_token'];
-	if (isset($this->_secrets['access_secret']))
+        if (isset($this->_secrets['access_secret']))
             $this->_secrets['oauth_secret'] = $this->_secrets['access_secret'];
+        if (isset($this->_secrets['access_token_secret']))
+            $this->_secrets['oauth_secret'] = $this->_secrets['access_token_secret'];
         // Gauntlet
         if (empty($this->_secrets['consumer_key']))
             throw new OAuthSimpleException('Missing required consumer_key in OAuthSimple.setTokensAndSecrets');
@@ -291,11 +293,11 @@ class OAuthSimple {
     // No promises are kept that any of these functions will continue to exist
     // in future versions.
     function _parseParameterString ($paramString) {
-        $elements = split('&',$paramString);
+        $elements = explode('&',$paramString);
         $result = array();
         foreach ($elements as $element)
         {
-            list ($key,$token) = split('=',$element);
+            list ($key,$token) = explode('=',$element);
             if ($token)
                 $token = urldecode($token);
             if (!empty($result[$key]))
