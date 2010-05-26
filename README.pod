@@ -24,7 +24,8 @@ Header (as per the spec), or the fully structured URL. (Again, see source
 comments for appropriate usage.)
 
 Please note that the Javascript version is not heavily optimized at this time.
-If you wish to use a more optimized version, please consult <a href="http://github.com/itrelease/oauthsimple">Anton Byrna's fork</a>. 
+If you wish to use a more optimized version, please consult 
+Anton Byrna's fork.  <http://github.com/itrelease/oauthsimple>
 
 =head1 LICENSE
 
