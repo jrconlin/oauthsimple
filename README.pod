@@ -19,7 +19,7 @@ hint, hint.)
 
 Guido Schlabitz has provided a useful example for how to use 
 OAuthSimple to connect to Google
-L<blob/master/php/example.php> 
+L<http://github.com/jrconlin/oauthsimple/blob/master/php/example.php> 
 
 
 OAuthSimple accepts arguments in a variety of formats and returns a structure
