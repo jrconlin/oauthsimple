@@ -17,6 +17,9 @@ following languages are supported: PHP, Javascript. I'd love to add additional
 languages and may do so in the future. (I'd be happy to accept contributions, 
 hint, hint.)
 
+Guido Schlabitz has provided a useful example for how to use L<<a href="blob/master/php/example.php">OAuthSimple to connect to Google</a>>
+
+
 OAuthSimple accepts arguments in a variety of formats and returns a structure
 containing valid elements, including a fully structured URL, an Authorization 
 header and the signature value. You should only use either the Authorization 
@@ -25,7 +28,7 @@ comments for appropriate usage.)
 
 Please note that the Javascript version is not heavily optimized at this time.
 If you wish to use a more optimized version, please consult 
-Anton Byrna's fork.  <http://github.com/itrelease/oauthsimple>
+L<<a href="http://github.com/itrelease/oauthsimple">Anton Byrna's fork</a>>
 
 =head1 LICENSE
 
