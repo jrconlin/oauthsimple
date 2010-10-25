@@ -260,9 +260,7 @@ if (OAuthSimple === undefined)
                 this.setSignatureMethod(args['method']);
                 }
             this.setTokensAndSecrets(args['signatures']);
-            if (args['parameters'] !== undefined){
             this.setParameters(args['parameters']);
-            }
             // check the parameters
             var normParams = this._normalizedParameters();
             this._parameters['oauth_signature']=this._generateSignature(normParams);

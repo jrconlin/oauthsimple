@@ -220,7 +220,7 @@ class OAuthSimple {
                 $this->_parameters['oauth_signature_method']=$method;
                 break;
             default:
-                throw new OAuthSimpleException ('Unknown signing method specified for OAuthSimple.setSignatureMethod');
+                throw new OAuthSimpleException ("Unknown signing method $method specified for OAuthSimple.setSignatureMethod");
         }
         return $this;
     }
@@ -243,8 +243,7 @@ class OAuthSimple {
             $this->setSignatureMethod($args['method']);
         if (!empty($args['signatures']))
             $this->setTokensAndSecrets($args['signatures']);
-        if (!empty($args['parameters']))
-            $this->setParameters($args['parameters']);
+        $this->setParameters($args['parameters']);
         $normParams = $this->_normalizedParameters();
         $this->_parameters['oauth_signature'] = $this->_generateSignature($normParams);
         return Array(
@@ -278,15 +277,15 @@ class OAuthSimple {
             {
                 foreach ($pValue as $val)
                 {
-                    $result .= $pName .'="' . $this->_oauthEscape($val) . '" ';
+                    $result .= $pName .'="' . $this->_oauthEscape($val) . '", ';
                 }
             }
             else
             {
-                $result .= $pName . '="' . $this->_oauthEscape($pValue) . '" ';
+                $result .= $pName . '="' . $this->_oauthEscape($pValue) . '", ';
             }
         }
-        return $result;
+        return preg_replace('/, $/','',$result);
     }
 
     // Start private methods. Here be Dragons.
