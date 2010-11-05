@@ -4,10 +4,10 @@
   * author:     jr conlin
   * mail:       src@anticipatr.com
   * copyright:  unitedHeroes.net
-  * version:    1.0 
+  * version:    1.2 
   * url:        http://unitedHeroes.net/OAuthSimple
   *
-  * Copyright (c) 2009, unitedHeroes.net
+  * Copyright (c) 2010, unitedHeroes.net
   * All rights reserved.
   *
   * Redistribution and use in source and binary forms, with or without
@@ -53,7 +53,7 @@ if (OAuthSimple === undefined)
      * If you want to use the higher order security that comes from the
      * OAuth token (sorry, I don't provide the functions to fetch that because
      * sites aren't horribly consistent about how they offer that), you need to
-     * pass those in either with .setTokensAndSecrets() or as an argument to the
+     * pass those in either with .signatures() or as an argument to the
      * .sign() or .getHeaderString() functions.
      *
      * Example:
@@ -102,6 +102,7 @@ if (OAuthSimple === undefined)
         this.reset = function() {
             this._parameters={};
             this._path=undefined;
+            this.sbs=undefined;
             return this;
         };
 
@@ -116,7 +117,7 @@ if (OAuthSimple === undefined)
             if (typeof(parameters) == 'string') {
                 parameters=this._parseParameterString(parameters); 
                 }
-            this._parameters = parameters;
+            this._parameters = this._merge(parameters,this._parameters);
             if (this._parameters['oauth_nonce'] === undefined) {
                 this._getNonce();
                 }
@@ -187,12 +188,10 @@ if (OAuthSimple === undefined)
          *
          * @param signatures {object} object/hash of the token/signature pairs {api_key:, shared_secret:, oauth_token: oauth_secret:}
          */
-        this.setTokensAndSecrets = function(signatures) {
+        this.signatures = function(signatures) {
             if (signatures)
             {
-                for (var i in signatures) {
-                    this._secrets[i] = signatures[i];
-                    }
+                this._secrets = this._merge(signatures,this._secrets);
             }
             // Aliases
             if (this._secrets['api_key']) {
@@ -209,15 +208,19 @@ if (OAuthSimple === undefined)
                 }
             // Gauntlet
             if (this._secrets.consumer_key === undefined) {
-                throw('Missing required consumer_key in OAuthSimple.setTokensAndSecrets');
+                throw('Missing required consumer_key in OAuthSimple.signatures');
                 }
             if (this._secrets.shared_secret === undefined) {
-                throw('Missing required shared_secret in OAuthSimple.setTokensAndSecrets');
+                throw('Missing required shared_secret in OAuthSimple.signatures');
                 }
             if ((this._secrets.oauth_token !== undefined) && (this._secrets.oauth_secret === undefined)) {
-                throw('Missing oauth_secret for supplied oauth_token in OAuthSimple.setTokensAndSecrets');
+                throw('Missing oauth_secret for supplied oauth_token in OAuthSimple.signatures');
                 }
             return this;
+        };
+
+        this.setTokensAndSecrets = function(signatures) {
+            return this.signatures(signatures);
         };
 
         /** set the signature method (currently only Plaintext or SHA-MAC1)
@@ -259,7 +262,7 @@ if (OAuthSimple === undefined)
             if (args['method'] !== undefined) {
                 this.setSignatureMethod(args['method']);
                 }
-            this.setTokensAndSecrets(args['signatures']);
+            this.signatures(args['signatures']);
             this.setParameters(args['parameters']);
             // check the parameters
             var normParams = this._normalizedParameters();
@@ -456,6 +459,17 @@ if (OAuthSimple === undefined)
             }
             return null;
         };
+
+        this._merge = function(source,target) {
+            if (source == undefined)
+                source = {};
+            if (target == undefined)
+                target = {};
+            for (var key in source) {
+                target[key] = source[key];
+            }
+            return target;
+        }
 
     return this;
     };

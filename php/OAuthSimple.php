@@ -8,7 +8,7 @@
   * version:    1.2
   * url:        http://unitedHeroes.net/OAuthSimple
   *
-  * Copyright (c) 2009, unitedHeroes.net
+  * Copyright (c) 2010, unitedHeroes.net
   * All rights reserved.
   *
   * Redistribution and use in source and binary forms, with or without
@@ -185,8 +185,7 @@ class OAuthSimple {
         if (!empty($signatures) && !is_array($signatures))
             throw new OAuthSimpleException('Must pass dictionary array to OAuthSimple.signatures');
         if (!empty($signatures))
-            foreach ($signatures as $sig=>$value)
-                $this->_secrets[$sig] = $value;
+            $signatures=array_merge($this->_secrets,$signatures);
         // Aliases
         if (isset($this->_secrets['api_key']))
             $this->_secrets['consumer_key'] = $this->_secrets['api_key'];
