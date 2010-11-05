@@ -20,6 +20,8 @@ error_reporting(E_ALL);
         'term'=>'the prisoner',
         'expand'=>'formats,synopsis',
         'max_results'=> '1',
+        'v'=>'2.0',
+        'output'=>'json'
     );
 
     $path = "http://api.netflix.com/catalog/titles";
@@ -37,7 +39,6 @@ error_reporting(E_ALL);
     $oauth = new OAuthSimple($apiKey,$sharedSecret);
     $sample2Results = $oauth->sign(Array('action'=>'GET',
                                          'path'=>$path,
-                                         'method'=>'HMAC-SHA1',
                                          'parameters'=>$argumentsAsObject));
 
     # Test 3 ======
