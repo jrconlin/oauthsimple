@@ -1,12 +1,5 @@
 use strict;
-
-# Required for exception handling.
-
-use Error qw(:try); 
-use MIME::Base64;
-use URI::Escape;
 use Data::Dumper;
-
 # OAuthSimple
 # A simpler version of OAuth
 #
@@ -45,6 +38,8 @@ use Data::Dumper;
 # Define a custom Exception for easy trap and detection
 #
 package OAuthSimpleException;
+    use Data::Dumper;
+    use base qw(Error);
     use overload ('""' => 'stringify');
 
     sub stringify {
@@ -87,6 +82,12 @@ package OAuthSimple;
 # that, read on, McDuff.
 #/
 
+    use Error qw(:try); # required for exception handling
+    use MIME::Base64;   # required for OAuth
+    use Digest::SHA;
+    use URI::Escape;
+
+
 # OAuthSimple creator
 #
 # Create an instance of OAuthSimple
@@ -94,7 +95,7 @@ package OAuthSimple;
 # @param api_key {string}       The API Key (sometimes referred to as the consumer key) This value is usually supplied by the site you wish to use.
 # @param shared_secret (string) The shared secret. This value is also usually provided by the site you wish to use.
 #/
-    sub OAuthSimple {
+    sub new {
         my $this = {_secrets=>{},
                     _parameters=>{},
                     _default_signature_method=>'HMAC-SHA1',
@@ -103,6 +104,7 @@ package OAuthSimple;
         my $class = shift;
         $class = ref($class) || $class;
         bless $this,$class;
+        $DB::single=1;
 
         my ($apikey,$sharedSecret) = @_;
 
@@ -134,14 +136,16 @@ package OAuthSimple;
         my $this = shift;
         my $parameters = shift;
         
-        if (ref($parameters) eq '') {
-            $parameters = $this->_parseParameterString($parameters);
-        }
-        if (empty($this->{_parameters})) {
-            $this->{_parameters} = $parameters;
-        }
-        elsif (!empty($parameters)) {
-            $this->_parameters = array_merge($this->_parameters,$parameters);
+        if (defined($parameters)) {
+            if (ref($parameters) eq '') {
+                $parameters = $this->_parseParameterString($parameters);
+            }
+            if (empty($this->{_parameters})) {
+                $this->{_parameters} = $parameters;
+            }
+            elsif (!empty($parameters)) {
+                $this->_parameters = array_merge($this->_parameters,$parameters);
+            }
         }
         if (empty($this->{_parameters}->{oauth_nonce})) {
             $this->_getNonce();
@@ -182,7 +186,7 @@ package OAuthSimple;
         my $path=shift;
 
         if (empty($path)) {
-            throw OAuthSimpleException('No path specified');
+            Error::throw OAuthSimpleException('No path specified');
         }
         $this->{_path}=$path;
         return $this;
@@ -195,7 +199,7 @@ package OAuthSimple;
     sub setPath {
         my $this=shift;
 
-        return $this->setURL($@);
+        return $this->setURL(shift);
     }
 
 # set the "action" for the url, (e.g. GET,POST, DELETE, etc.)
@@ -207,7 +211,7 @@ package OAuthSimple;
         my $action=uc(shift || 'GET');
 
         if ($action =~ /[^A-Z]/) {
-            throw OAuthSimpleException('Invalid action specified for OAuthSimple.setAction');
+            Error::throw OAuthSimpleException('Invalid action specified for OAuthSimple.setAction');
         }
         $this->{_action} = $action;
         return $this;
@@ -222,7 +226,7 @@ package OAuthSimple;
         my $signatures=shift;
 
         if (!empty($signatures) && ref($signatures) ne 'HASH') {
-            throw OAuthSimpleException('Must pass HASH to OAuthSimple.setTokensAndSecrets');
+            Error::throw OAuthSimpleException('Must pass HASH to OAuthSimple.setTokensAndSecrets');
         }
         if (!empty($signatures)) {
             while (my ($sig,$value) = each %$signatures) {
@@ -247,13 +251,13 @@ package OAuthSimple;
         }
 # Gauntlet
         if (empty($this->{_secrets}->{oauth_consumer_key})) {
-            throw OAuthSimpleException('Missing required oauth_consumer_key in OAuthSimple.setTokensAndSecrets');
+            Error::throw OAuthSimpleException('Missing required oauth_consumer_key in OAuthSimple.setTokensAndSecrets');
         }
         if (empty($this->{_secrets}->{shared_secret})) {
-            throw OAuthSimpleException('Missing requires shared_secret in OAuthSimple.setTokensAndSecrets');
+            Error::throw OAuthSimpleException('Missing requires shared_secret in OAuthSimple.setTokensAndSecrets');
         }
         if (!empty($this->{_secrets}->{oauth_token}) && empty($this->{_secrets}->{oauth_secret})) {
-            throw OAuthSimpleException('Missing oauth_secret for supplied oauth_token in OAuthSimple.setTokensAndSecrets');
+            Error::throw OAuthSimpleException('Missing oauth_secret for supplied oauth_token in OAuthSimple.setTokensAndSecrets');
         }
         return $this;
     }
@@ -270,7 +274,7 @@ package OAuthSimple;
         if($method eq 'PLAINTEXT' || $method eq 'HMAC-SHA1') {
             $this->{_parameters}->{oauth_signature_method}=$method;
         } else {
-            throw OAuthSimpleException ("Unknown signing method $method specified for OAuthSimple.setSignatureMethod");
+            Error::throw OAuthSimpleException ("Unknown signing method $method specified for OAuthSimple.setSignatureMethod");
         }
         return $this;
     }
@@ -292,7 +296,7 @@ package OAuthSimple;
             $this->setAction($args->{action});
         }
         if (!empty($args->{path})) {
-            $this->setPath($args->{path});
+            $this->setURL($args->{path});
         }
         if (!empty($args->{method})) {
             $this->setSignatureMethod($args->{method});
@@ -386,7 +390,7 @@ package OAuthSimple;
             return '';
         }
         if (ref($string) eq 'ARRAY' || ref($string) eq 'HASH') {
-            throw OAuthSimpleException('Array passed to _oauthEscape');
+            Error::throw OAuthSimpleException('Array passed to _oauthEscape');
         }
         $string = uri_escape($string);
         $string =~ s/\+/%20/gm;
@@ -402,11 +406,11 @@ package OAuthSimple;
         my $this=shift;
         my $length=shift || 5;
         my $result = '';    
-        my $cLength = length($this->_nonce_chars);
+        my $cLength = length($this->{_nonce_chars});
 
         for (my $i=0; $i < $length; $i++)
         {
-            $result .= substr($this->_nonce_chars,rand($cLength),1);
+            $result .= substr($this->{_nonce_chars},rand($cLength),1);
         }
         $this->{_parameters}->{oauth_nonce} = $result;
         return $result;
@@ -417,7 +421,7 @@ package OAuthSimple;
 
         if (empty($this->{_secrets}->{oauth_consumer_key}))
         {
-            throw OAuthSimpleException('No oauth_consumer_key set for OAuthSimple');
+            Error::throw OAuthSimpleException('No oauth_consumer_key set for OAuthSimple');
         }
         $this->{_parameters}->{oauth_consumer_key}=$this->{_secrets}->{oauth_consumer_key};
         return $this->{_parameters}->{oauth_consumer_key};
@@ -430,7 +434,7 @@ package OAuthSimple;
             return '';
         }
         if (!defined($this->{_secrets}->{oauth_token})) {
-            throw OAuthSimpleException('No access token (oauth_token) set for OAuthSimple.');
+            Error::throw OAuthSimpleException('No access token (oauth_token) set for OAuthSimple.');
         }
         $this->{_parameters}->{oauth_token} = $this->{_secrets}->{oauth_token};
         return $this->{_parameters}->{oauth_token};
@@ -478,15 +482,16 @@ package OAuthSimple;
             return $secretKey;
         } elsif ($this->{_parameters}->{oauth_signature_method} eq 'HMAC-SHA1') {
             $this->{sbs} = $this->_oauthEscape($this->{_action}).'&'.$this->_oauthEscape($this->{_path}).'&'.$this->_oauthEscape($this->_normalizedParameters());
-            return base64_encode(hash_hmac('sha1',$this->{sbs},$secretKey,1));
+            # For what it's worth, I prefer long form method calls like this since it identifies the source package.
+            return MIME::Base64::encode_base64(Digest::SHA::hmac_sha1($this->{sbs},$secretKey));
         } else {
-            throw OAuthSimpleException('Unknown signature method for OAuthSimple');
+            Error::throw OAuthSimpleException('Unknown signature method for OAuthSimple');
         }
     }
 
 # Utilities
     sub array_merge {
-        my $this=shift;
+     #   my $this=shift;
         my $source=shift;
         my $target=shift;
 
@@ -496,7 +501,8 @@ package OAuthSimple;
     }
 
     sub empty {
-        my $this=shift;
+    #    my $this=shift;
+        #TODO: Check if the first elem is a ref to this && skip
         my $testable = shift;
 
         if (!defined($testable)) {
