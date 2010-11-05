@@ -5,7 +5,7 @@
   * author:     jr conlin
   * mail:       src@anticipatr.com
   * copyright:  unitedHeroes.net
-  * version:    1.0
+  * version:    1.2
   * url:        http://unitedHeroes.net/OAuthSimple
   *
   * Copyright (c) 2009, unitedHeroes.net
@@ -62,7 +62,7 @@ class OAuthSimple {
      * If you want to use the higher order security that comes from the
      * OAuth token (sorry, I don't provide the functions to fetch that because
      * sites aren't horribly consistent about how they offer that), you need to
-     * pass those in either with .setTokensAndSecrets() or as an argument to the
+     * pass those in either with .signatures() or as an argument to the
      * .sign() or .getHeaderString() functions.
      *
      * Example:
@@ -180,9 +180,9 @@ class OAuthSimple {
     *
     * @param signatures {object} object/hash of the token/signature pairs {api_key:, shared_secret:, oauth_token: oauth_secret:}
     */
-    function setTokensAndSecrets ($signatures) {
+    function signatures ($signatures) {
         if (!empty($signatures) && !is_array($signatures))
-            throw new OAuthSimpleException('Must pass dictionary array to OAuthSimple.setTokensAndSecrets');
+            throw new OAuthSimpleException('Must pass dictionary array to OAuthSimple.signatures');
         if (!empty($signatures))
             foreach ($signatures as $sig=>$value)
                 $this->_secrets[$sig] = $value;
@@ -197,12 +197,16 @@ class OAuthSimple {
             $this->_secrets['oauth_secret'] = $this->_secrets['access_token_secret'];
         // Gauntlet
         if (empty($this->_secrets['consumer_key']))
-            throw new OAuthSimpleException('Missing required consumer_key in OAuthSimple.setTokensAndSecrets');
+            throw new OAuthSimpleException('Missing required consumer_key in OAuthSimple.signatures');
         if (empty($this->_secrets['shared_secret']))
-            throw new OAuthSimpleException('Missing requires shared_secret in OAuthSimple.setTokensAndSecrets');
+            throw new OAuthSimpleException('Missing requires shared_secret in OAuthSimple.signatures');
         if (!empty($this->_secrets['oauth_token']) && empty($this->_secrets['oauth_secret']))
-            throw new OAuthSimpleException('Missing oauth_secret for supplied oauth_token in OAuthSimple.setTokensAndSecrets');
+            throw new OAuthSimpleException('Missing oauth_secret for supplied oauth_token in OAuthSimple.signatures');
         return $this;
+    }
+
+    function setTokensAndSecrets($signatures) {
+        return $this->signatures($signatures);
     }
 
     /** set the signature method (currently only Plaintext or SHA-MAC1)
@@ -242,7 +246,7 @@ class OAuthSimple {
         if (!empty($args['method']))
             $this->setSignatureMethod($args['method']);
         if (!empty($args['signatures']))
-            $this->setTokensAndSecrets($args['signatures']);
+            $this->signatures($args['signatures']);
         $this->setParameters($args['parameters']);
         $normParams = $this->_normalizedParameters();
         $this->_parameters['oauth_signature'] = $this->_generateSignature($normParams);
