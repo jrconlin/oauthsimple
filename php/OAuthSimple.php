@@ -107,6 +107,7 @@ class OAuthSimple {
     function reset() {
         $this->_parameters=null;
         $this->path=null;
+        $this->sbs=null;
         return $this;    
     }
 
