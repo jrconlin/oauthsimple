@@ -185,7 +185,7 @@ List of parameters for the call, this can either be a URI string (e.g. "foo=bar&
                 $this->{_parameters} = $parameters;
             }
             elsif (!empty($parameters)) {
-                $this->_parameters = array_merge($this->_parameters,$parameters);
+                $this->{_parameters} = array_merge($this->{_parameters},$parameters);
             }
         }
         if (empty($this->{_parameters}->{oauth_nonce})) {
@@ -260,7 +260,7 @@ convienence method for setPath
     sub setURL {
         my $this=shift;
 
-        return $this->setURL(shift);
+        return $this->setPath(shift);
     }
 
 =pod
@@ -424,7 +424,7 @@ hash of arguments for the call. Allowed elements are:
             $this->setAction($args->{action});
         }
         if (!empty($args->{path})) {
-            $this->setURL($args->{path});
+            $this->setPath($args->{path});
         }
         if (!empty($args->{method})) {
             $this->setSignatureMethod($args->{method});
