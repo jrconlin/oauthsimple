@@ -10,7 +10,7 @@
         <li><a id="sample2">Second Link</a>
         <li><a id="sample3">Third Link</a>
         </ol>
-        <div id="hasConsole" style="display:none">Psst! Open your firefox console for the output objects.</div>
+        <div id="hasConsole" style="display:none">Psst! Open your console for the output objects.</div>
 
         <a href="OAuthSimple.js">The javascript file</a>
 
@@ -62,7 +62,7 @@
 
             // Test 3 ===== the totally easy way.
             OAuthSimple().reset();
-            var sample3Results = OAuthSimple().sign({path:path,
+            var sample3Results = (new OAuthSimple()).sign({path:path,
                                                   parameters:argumentsAsString,
                                                   signatures:{
                                                     'consumer_key':apiKey, 'shared_secret': sharedSecret,
