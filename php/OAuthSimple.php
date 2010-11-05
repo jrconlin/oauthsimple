@@ -184,8 +184,12 @@ class OAuthSimple {
     function signatures ($signatures) {
         if (!empty($signatures) && !is_array($signatures))
             throw new OAuthSimpleException('Must pass dictionary array to OAuthSimple.signatures');
-        if (!empty($signatures))
-            $signatures=array_merge($this->_secrets,$signatures);
+        if (!empty($signatures)){
+            if (empty($this->_secrets)) {
+                $this->_secrets=Array();
+            }
+            $this->_secrets=array_merge($this->_secrets,$signatures);
+        }
         // Aliases
         if (isset($this->_secrets['api_key']))
             $this->_secrets['consumer_key'] = $this->_secrets['api_key'];
@@ -247,6 +251,8 @@ class OAuthSimple {
             $this->setSignatureMethod($args['method']);
         if (!empty($args['signatures']))
             $this->signatures($args['signatures']);
+        if (empty($args['parameters']))
+            $args['parameters']=array();        // squelch the warning.
         $this->setParameters($args['parameters']);
         $normParams = $this->_normalizedParameters();
         $this->_parameters['oauth_signature'] = $this->_generateSignature($normParams);
