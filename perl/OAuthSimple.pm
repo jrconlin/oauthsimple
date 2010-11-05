@@ -6,10 +6,10 @@ use Data::Dumper;
 # author:     jr conlin
 # mail:       src@anticipatr.com
 # copyright:  unitedHeroes.net
-# version:    1.0
+# version:    1.2
 # url:        http://unitedHeroes.net/OAuthSimple
 #
-# Copyright (c) 2009, unitedHeroes.net
+# Copyright (c) 2010, unitedHeroes.net
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -53,48 +53,74 @@ package OAuthSimpleException;
 
 
 package OAuthSimple;
-# Simple OAuth
-#
-# This class only builds the OAuth elements, it does not do the actual
-# transmission or reception of the tokens. It does not validate elements
-# of the token. It is for client use only.
-#
-# api_key is the API key, also known as the OAuth consumer key
-# shared_secret is the shared secret (duh).
-#
-# Both the api_key and shared_secret are generally provided by the site
-# offering OAuth services. You need to specify them at object creation
-# because nobody <explative>ing uses OAuth without that minimal set of
-# signatures.
-#
-# If you want to use the higher order security that comes from the
-# OAuth token (sorry, I don't provide the functions to fetch that because
-# sites aren't horribly consistent about how they offer that), you need to
-# pass those in either with .setTokensAndSecrets() or as an argument to the
-# .sign() or .getHeaderString() functions.
-#
-# Example:
+=pod
 
-    ##TODO: code samples
+=head1 NAME
 
-#
-# that will sign as a "GET" using "SHA1-MAC" the url. If you need more than
-# that, read on, McDuff.
-#/
+OAuthSimple
+
+=head1 SYNOPSIS
+
+    use OAuthSimple;
+
+    $oauth = new OAuthSimple();
+    $ret = $oauth->sign({path=>"http://jrconlin.com",
+                  signatures=>{oauth_consumer_key=>'abcd', shared_secret=>'1234',
+                               oauth_token=>'zyxw', oauth_secret=>'0987'},
+                  parameters=>{term=>'Mac and Me','v'=>'2.0',foo=>[1,2,3]});
+    `curl -v $ret->{signed_url}`;
+
+=head1 DESCRIPTION
+
+OAuthSimple was built to provide a simple, intuitive way to do OAuth signatures.
+
+
+This class only builds the OAuth elements, it does not do the actual
+transmission or reception of the tokens. It does not validate elements
+of the token. It is for client use only.
+
+oauth_consumer_key is the API key, shared_secret is the shared secret (duh).
+
+Both the oauth_consumer_key and shared_secret are generally provided by the site
+offering OAuth services. You need to specify them at object creation
+because nobody <explative>ing uses OAuth without that minimal set of
+signatures.
+
+If you want to use the higher order security that comes from the
+OAuth token (sorry, I don't provide the functions to fetch that because
+sites aren't horribly consistent about how they offer that), you need to
+pass those in either with .signatures() or as an argument to the
+.sign() or .getHeaderString() functions.
+
+that will sign as a "GET" using "SHA1-MAC" the url. If you need more than
+that, read on, McDuff.
+
+=cut
 
     use Error qw(:try); # required for exception handling
     use MIME::Base64;   # required for OAuth
     use Digest::SHA;
     use URI::Escape;
 
+=pod
 
-# OAuthSimple creator
-#
-# Create an instance of OAuthSimple
-#
-# @param api_key {string}       The API Key (sometimes referred to as the consumer key) This value is usually supplied by the site you wish to use.
-# @param shared_secret (string) The shared secret. This value is also usually provided by the site you wish to use.
-#/
+=head2 B<new OAuthSimple>([I<oauth_consumer_key>, I<shared_secret>]);
+
+Create a new instance of OAuthSimple, optionally initializing the low security signature elements.
+
+=over
+
+=item api_key {string}
+
+ The API Key (sometimes referred to as the consumer key) This value is usually supplied by the site you wish to use.
+
+=item shared_secret (string) 
+
+The shared secret. This value is also usually provided by the site you wish to use.
+
+=back
+
+=cut
     sub new {
         my $this = {_secrets=>{},
                     _parameters=>{},
@@ -104,7 +130,6 @@ package OAuthSimple;
         my $class = shift;
         $class = ref($class) || $class;
         bless $this,$class;
-        $DB::single=1;
 
         my ($apikey,$sharedSecret) = @_;
 
@@ -117,21 +142,37 @@ package OAuthSimple;
         return $this;
     }
 
-# reset the parameters and url 
-#
-#/
+=pod 
+
+=head2 B<reset>();
+
+Reinitialize the current OAuthSimple object, purging parameters and paths, but keeping signature values. Useful for subsequent calls.
+
+=cut
     sub reset {
         my $this = shift;
 
         $this->{_parameters}=undef;
         $this->{path}=undef;
+        $this->{sbs}=undef;
         return $this;    
     }
 
-# set the parameters either from a hash or a string
-#
-# @param {string,object} List of parameters for the call, this can either be a URI string (e.g. "foo=bar&gorp=banana" or an object/hash)
-#/
+=pod
+
+=head2 B<setParameters>(I<parameters>)
+
+set the parameters either from a hash or a string
+
+=over
+
+=item {string or HASH} 
+
+List of parameters for the call, this can either be a URI string (e.g. "foo=bar&gorp=banana" or an hash)
+
+=back
+
+=cut
     sub setParameters {
         my $this = shift;
         my $parameters = shift;
@@ -165,11 +206,16 @@ package OAuthSimple;
         if (empty($this->{_parameters}->{oauth_version})) {
             $this->{_parameters}->{oauth_version}="1.0";
         }
-#error_log('parameters: '.print_r($this,1));
         return $this;
     }
 
-# convienence method for setParameters
+=pod
+
+=head2 B<setQueryString>(I<parameters>)
+
+Convenience method for setParameters();
+
+=cut
     sub setQueryString {
         my $this=shift;
         my $parameters = @_;
@@ -177,11 +223,23 @@ package OAuthSimple;
         return $this->setParameters($parameters);
     }
 
-# Set the target URL (does not include the parameters)
-#
-# @param path {string} the fully qualified URI (excluding query arguments) (e.g "http://example.org/foo")
-#/
-    sub setURL {
+
+=pod
+
+=head2 B<setURL>(I<URL>);
+
+ Set the target URL (does not include the parameters)
+
+=over
+
+=item path {string} 
+
+the fully qualified URI (excluding query arguments) (e.g "http://example.org/foo")
+
+=back
+
+=cut
+    sub setPath {
         my $this=shift;
         my $path=shift;
 
@@ -192,20 +250,34 @@ package OAuthSimple;
         return $this;
     }
 
-# convienence method for setURL
-#
-# @param path {string} see .setURL
-#/
-    sub setPath {
+=pod
+
+=head2 setURL(I<URL>)
+
+convienence method for setPath
+
+=cut
+    sub setURL {
         my $this=shift;
 
         return $this->setURL(shift);
     }
 
-# set the "action" for the url, (e.g. GET,POST, DELETE, etc.)
-#
-# @param action {string} HTTP Action word.
-#/
+=pod
+
+=head2 B<setAction>(I<action>);
+
+set the "action" for the url, (e.g. GET,POST, DELETE, etc.)
+
+=over
+
+=item action {string} 
+
+HTTP Action word.
+
+=back
+
+=cut
     sub setAction {
         my $this=shift;
         my $action=uc(shift || 'GET');
@@ -217,21 +289,30 @@ package OAuthSimple;
         return $this;
     }
 
-# set the signatures (as well as validate the ones you have)
-#
-# @param signatures {object} object/hash of the token/signature pairs {api_key:, shared_secret:, oauth_token: oauth_secret:}
-#/
-    sub setTokensAndSecrets {
+=pod
+
+=head2 B<signatures>(I<signatureHash>)
+
+set the signatures (as well as validate the ones you have)
+
+=over 
+
+=item signatures {object} 
+
+object/hash of the token/signature pairs {oauth_consumer_key:, shared_secret:, oauth_token: oauth_secret:}
+
+=back
+
+=cut
+    sub signatures {
         my $this=shift;
         my $signatures=shift;
 
         if (!empty($signatures) && ref($signatures) ne 'HASH') {
-            Error::throw OAuthSimpleException('Must pass HASH to OAuthSimple.setTokensAndSecrets');
+            Error::throw OAuthSimpleException('Must pass HASH to OAuthSimple.signatures');
         }
         if (!empty($signatures)) {
-            while (my ($sig,$value) = each %$signatures) {
-                $this->{_secrets}->{$sig} = $value;
-            }
+            $this->{_secrets} = array_merge($signatures,$this->{_secrets});
         }
 # Aliases
         if (defined($this->{_secrets}->{api_key})) {
@@ -251,21 +332,46 @@ package OAuthSimple;
         }
 # Gauntlet
         if (empty($this->{_secrets}->{oauth_consumer_key})) {
-            Error::throw OAuthSimpleException('Missing required oauth_consumer_key in OAuthSimple.setTokensAndSecrets');
+            Error::throw OAuthSimpleException('Missing required oauth_consumer_key in OAuthSimple.signatures');
         }
         if (empty($this->{_secrets}->{shared_secret})) {
-            Error::throw OAuthSimpleException('Missing requires shared_secret in OAuthSimple.setTokensAndSecrets');
+            Error::throw OAuthSimpleException('Missing requires shared_secret in OAuthSimple.signatures');
         }
         if (!empty($this->{_secrets}->{oauth_token}) && empty($this->{_secrets}->{oauth_secret})) {
-            Error::throw OAuthSimpleException('Missing oauth_secret for supplied oauth_token in OAuthSimple.setTokensAndSecrets');
+            Error::throw OAuthSimpleException('Missing oauth_secret for supplied oauth_token in OAuthSimple.signatures');
         }
         return $this;
     }
 
-# set the signature method (currently only Plaintext or SHA-MAC1)
-#
-# @param method {string} Method of signing the transaction (only PLAINTEXT and SHA-MAC1 allowed for now)
-#/
+
+=pod
+
+=head2 setTokensAndSecrets(I<signatureHash>)
+
+Convenience method for signatures
+
+=cut
+    sub setTokensAndSecrets {
+        my $this = shift;
+
+        return $this->signatures(shift);
+    }
+
+=pod 
+
+=head2 setSignatureMethod(I<method>)
+
+set the signature method (currently only Plaintext or SHA-MAC1) Currently defaults to Plaintext
+
+=over
+
+=item method {string} 
+
+Method of signing the transaction (only PLAINTEXT and SHA-MAC1 allowed for now)
+
+=back
+
+=cut
     sub setSignatureMethod {
         my $this = shift;
         my $method = shift || $this->{_default_signature_method};
@@ -279,15 +385,37 @@ package OAuthSimple;
         return $this;
     }
 
-# sign the request
-#
-# note: all arguments are optional, provided you've set them using the
-# other helper functions.
-#
-# @param args {object} hash of arguments for the call
-#                   {action, path, parameters (array), method, signatures (array)}
-#                   all arguments are optional.
-#/
+=pod
+
+=head2 B<sign>(I<arguments>)
+
+sign the request
+
+note: all arguments are optional, provided you've set them using the other helper functions.
+
+=over 
+
+=item args {object} 
+
+hash of arguments for the call. Allowed elements are:
+
+=over
+
+=item action
+
+=item path
+
+=item parameters (hash)
+
+=item method
+
+=item signatures (hash)
+
+=back
+
+=back
+
+=cut
     sub sign {
         my $this=shift;
         my $args=shift;
@@ -300,9 +428,9 @@ package OAuthSimple;
         }
         if (!empty($args->{method})) {
             $this->setSignatureMethod($args->{method});
-        }
+        } 
         if (!empty($args->{signatures})) {
-            $this->setTokensAndSecrets($args->{signatures});
+            $this->signatures($args->{signatures});
         }
         $this->setParameters($args->{parameters});
         my $normParams = $this->_normalizedParameters();
@@ -316,14 +444,24 @@ package OAuthSimple;
             };
     }
 
-# Return a formatted "header" string
-#
-# NOTE: This doesn't set the "Authorization: " prefix, which is required.
-# I don't set it because various set header functions prefer different
-# ways to do that.
-#
-# @param args {object} see .sign
-#/
+=pod
+
+=head2 B<getHeaderString>(I<args>)
+
+Return a formatted "header" string
+
+NOTE: This doesn't set the "Authorization: " prefix, which is required.
+I don't set it because various set header functions prefer different
+ways to do that.
+
+=over
+
+=item args {object} 
+
+see .sign()
+
+=back
+=cut;
     sub getHeaderString { 
         my $this=shift;
         my $args=shift;
@@ -333,8 +471,8 @@ package OAuthSimple;
             $this->sign($args);
         }
 
-        while (my ($pName,$pValue) = each %{$this->{_parameters}}) {
-        {
+        my ($pName,$pValue);
+        while (($pName,$pValue) = each %{$this->{_parameters}}) {
             my $pValue = $this->{_parameters}->{$pName};
             if ($pName !~ /^oauth_/) {
                 next;
@@ -351,7 +489,8 @@ package OAuthSimple;
                 $result .= $pName . '="' . $this->_oauthEscape($pValue) . '", ';
             }
         }
-        return $result =~ s/, +$//;
+        $result =~ s/, +$//;
+        return $result;
     }
 
 # Start private methods. Here be Dragons.
@@ -367,7 +506,7 @@ package OAuthSimple;
         foreach my $element (@elements) {
             my ($key,$token) = split('=',$element);
             if ($token) {
-                $token = urldecode($token);
+                $token = URI::Escape::uri_unescape($token);
             }
             if (!empty($result->{$key})) {
                 if (ref($result->{$key} ne 'ARRAY')) {
@@ -392,7 +531,7 @@ package OAuthSimple;
         if (ref($string) eq 'ARRAY' || ref($string) eq 'HASH') {
             Error::throw OAuthSimpleException('Array passed to _oauthEscape');
         }
-        $string = uri_escape($string);
+        $string = URI::Escape::uri_escape($string);
         $string =~ s/\+/%20/gm;
         $string =~ s/\!/%21/gm;
         $string =~ s/\*/%2A/gm;
@@ -517,5 +656,20 @@ package OAuthSimple;
                 return $testable eq '';
         }
     }
-}
 1;
+
+=pod
+
+=head1 AUTHORS
+
+JR Conlin, jrconlin.com
+
+=head1 LICENSE
+
+This class is licensed under BSD, see source for details.
+
+=head1 AVAILABILITY 
+
+see L<http://jrconlin.com/oauthsimple> for current repository
+
+=cut
