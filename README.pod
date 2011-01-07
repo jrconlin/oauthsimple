@@ -13,7 +13,7 @@ token requests by itself, however you can use it to build the request calls.
 
 I've tried to build the library to be fairly common so that if you're familiar
 with how it works in one language, you can use it in any other. Right now the
-following languages are supported: PHP, Javascript, Perl. I'd love to add additional
+following languages are supported: PHP, Javascript, Perl, Python. I'd love to add additional
 languages and may do so in the future. (I'd be happy to accept contributions, 
 hint, hint.)
 
