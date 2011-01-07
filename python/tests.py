@@ -45,13 +45,19 @@ class TestOAuth(unittest.TestCase):
         content = json.loads(rsp.read())
         self.assertTrue(content.get('catalog')[0].get('id') == u'http://api.netflix.com/catalog/titles/movies/60035973')
     
+    def testComplex(self):
+        self.o1.reset();
+        self.o1.signatures(self.signatures);
+        self.o1.setPath(u'http://api.netflix.com/catalog/titles/movies/60035973');
+        self.o1.setParameters({'expand':'all',
+                               'v':'2.0',
+                               'output':'json'});
+        signed = self.o1.sign();
+        content = json.loads(urllib2.urlopen(signed.get('signed_url')).read())
+        # This is probably testing Netflix's API more than mine.
+        self.assertEqual(content['catalog_title']['directors'][0]['name'],u'Stewart Raffill')
+        
        
 if (__name__ == '__main__'):
     unittest.main()
-    
-## todo:
-#    finish test cases for:
-###        simple run
-#        partial run
-#        test remotely
     

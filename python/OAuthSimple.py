@@ -157,8 +157,6 @@ class OAuthSimple:
     def _oauthEscape (self,string):
         if not string:
             return '';
-        if type(string) not in [type(''),type(1)]:
-            raise OAuthSimpleException('Array passed to _oauthEscape')
         
         string = urllib2.quote(string);
         return string.replace('/','%2F').replace('+','%20').replace('!','%21').replace('*','%2A').replace('\\','%27').replace('(','%28').replace(')','%29')
