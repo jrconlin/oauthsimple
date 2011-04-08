@@ -29,7 +29,7 @@ class OAuthSimple:
     
     def __init__(self, apiKey = None, sharedSecret = None):
         if apiKey:
-            self._secrets['oauth_consumer_key']=apikey
+            self._secrets['oauth_consumer_key']=apiKey
         if sharedSecret:
             self._secrets['shared_secret']=sharedSecret
         return ;
