@@ -403,7 +403,7 @@ class OAuthSimple {
         switch($this->_parameters['oauth_signature_method'])
         {
             case 'PLAINTEXT':
-                return $secretKey;
+                return urlencode($secretKey);
 
             case 'HMAC-SHA1':
                 $this->sbs = $this->_oauthEscape($this->_action).'&'.$this->_oauthEscape($this->_path).'&'.$this->_oauthEscape($this->_normalizedParameters());
