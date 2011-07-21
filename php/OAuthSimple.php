@@ -330,7 +330,7 @@ class OAuthSimple {
             return '';
         if (is_array($string))
             throw new OAuthSimpleException('Array passed to _oauthEscape');
-        $string = urlencode($string);
+        $string = rawurlencode($string);
         $string = str_replace('+','%20',$string);
         $string = str_replace('!','%21',$string);
         $string = str_replace('*','%2A',$string);
