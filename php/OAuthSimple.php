@@ -326,7 +326,7 @@ class OAuthSimple {
     function _oauthEscape($string) {
         if ($string === 0)
             return 0;
-        if (empty($string))
+        if (strlen($string) == 0)
             return '';
         if (is_array($string))
             throw new OAuthSimpleException('Array passed to _oauthEscape');
