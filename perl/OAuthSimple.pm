@@ -9,8 +9,7 @@ use Data::Dumper;
 # version:    1.2
 # url:        http://unitedHeroes.net/OAuthSimple
 #
-# Copyright (c) 2010, unitedHeroes.net
-# All rights reserved.
+# Copyright (c) 2011, unitedHeroes.net
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
