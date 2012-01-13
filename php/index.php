@@ -35,8 +35,7 @@ error_reporting(E_ALL);
 
     # Test 2 =====
 
-    $oauth=null;
-    $oauth = new OAuthSimple($apiKey,$sharedSecret);
+    $oauth->reset();
     $sample2Results = $oauth->sign(Array('action'=>'GET',
                                          'path'=>$path,
                                          'parameters'=>$argumentsAsObject));

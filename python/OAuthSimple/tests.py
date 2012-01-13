@@ -43,7 +43,7 @@ class TestOAuth(unittest.TestCase):
         # send the link.
         try:
             rsp=urllib2.urlopen(signed.get('signed_url'))
-        except urllib2.HTTPError as ex:
+        except urllib2.HTTPError, ex:
             if (ex.headers.get('x-mashery-error-code') == 
                     'ERR_401_TIMESTAMP_IS_INVALID'):
                 print "Your clock is off. Check and retry."
