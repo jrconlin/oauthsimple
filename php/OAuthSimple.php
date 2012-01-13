@@ -51,7 +51,7 @@ class OAuthSimple {
 	 * @return OAuthSimple (Object)
 	 */	
     public function reset() {
-        $this->_parameters = TRUE;
+        $this->_parameters = Array();
         $this->path = NULL;
         $this->sbs = NULL;
 		
