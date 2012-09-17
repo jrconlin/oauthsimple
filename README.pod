@@ -43,10 +43,11 @@ Node.js Example
 
     OAuthSimple = require('OAuthSimple')
     oauth = new OAuthSimple("token", "secret")
-    request = oauth.sign
-      action: "GET"
-      path: "http://api.netflix.com/catalog/people"
+    request = oauth.sign({
+      action: "GET",
+      path: "http://api.netflix.com/catalog/people",
       parameters: { term: 'DeNiro' }
+    })
 
     // then use any library to request the following url
     request.signed_url
