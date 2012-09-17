@@ -33,6 +33,25 @@ If you wish to use a more optimized version, please consult
 Anton Byrna's fork
 L<http://github.com/itrelease/oauthsimple> 
 
+=head1 EXAMPLES
+
+Node.js Installation
+
+    > npm install oauthsimple
+
+Node.js Example
+
+    OAuthSimple = require('OAuthSimple')
+    oauth = new OAuthSimple("token", "secret")
+    request = oauth.sign
+      action: "GET"
+      path: "http://api.netflix.com/catalog/people"
+      parameters: { term: 'DeNiro' }
+
+    // then use any library to request the following url
+    request.signed_url
+
+
 =head1 LICENSE
 
 Code is released under a BSD licence.

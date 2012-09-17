@@ -1,0 +1,14 @@
+{
+  "name": "oauthsimple",
+  "version": "0.0.1",
+  "description": "git://github.com/idottv/oauthsimple.git",
+  "main": "js/OAuthSimple.js",
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/idottv/oauthsimple.git"
+  },
+  "author": "jrconlin",
+  "license": "BSD"
+}
