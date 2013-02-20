@@ -33,6 +33,10 @@ If you wish to use a more optimized version, please consult
 Anton Byrna's fork
 L<http://github.com/itrelease/oauthsimple> 
 
+OAuth Developers may be interested in my OAuthTestPage at:
+L<http://jrconlin.github.com/OAuthTestPage/>
+This will display OAuth1a valid elements and values so you can verify things are working correctly.
+
 =head1 LICENSE
 
 Code is released under a BSD licence.
