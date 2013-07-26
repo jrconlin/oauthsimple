@@ -290,8 +290,8 @@ if (OAuthSimple === undefined)
                 }
 
             var j, pName, pLength, result = 'OAuth ';
-            for (pName in this._parameters)
-            {
+            for (pName in this._parameters){
+              if(this._parameters.hasOwnProperty(pName)){
                 if (pName.match(/^oauth/) === undefined) {
                     continue;
                     }
@@ -307,6 +307,7 @@ if (OAuthSimple === undefined)
                 {
                     result += pName + '="' + this._oauthEscape(this._parameters[pName]) + '", ';
                 }
+              }
             }
             return result.replace(/,\s+$/, '');
         };
@@ -412,12 +413,13 @@ if (OAuthSimple === undefined)
                 paramNames = [],
                 i = 0,
                 ra = 0;
-            for (var paramName in this._parameters)
-            {
+            for (var paramName in this._parameters){
+              if (this._parameters.hasOwnProperty(paramNam)) {
                 if (ra++ > 1000) {
-                    throw ('runaway 1');
-                    }
+                  throw ('runaway 1');
+                }
                 paramNames.unshift(paramName);
+              }
             }
             paramNames = paramNames.sort();
             var pLen = paramNames.length;
@@ -470,7 +472,9 @@ if (OAuthSimple === undefined)
             if (target === undefined)
                 target = {};
             for (var key in source) {
+              if (source.hasOwnProperty(key)) {
                 target[key] = source[key];
+              }
             }
             return target;
         };
