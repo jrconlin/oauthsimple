@@ -414,7 +414,7 @@ if (OAuthSimple === undefined)
                 i = 0,
                 ra = 0;
             for (var paramName in this._parameters){
-              if (this._parameters.hasOwnProperty(paramNam)) {
+              if (this._parameters.hasOwnProperty(paramName)) {
                 if (ra++ > 1000) {
                   throw ('runaway 1');
                 }
