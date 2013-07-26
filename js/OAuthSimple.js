@@ -331,7 +331,7 @@ if (OAuthSimple === undefined)
                 if (result[keyToken[0]]) {
                     if (!(result[keyToken[0]] instanceof Array))
                     {
-                        result[keyToken[0]] = Array(result[keyToken[0]], value);
+                        result[keyToken[0]] = new Array(result[keyToken[0]], value);
                     }
                     else
                     {
