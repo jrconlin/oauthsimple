@@ -392,7 +392,7 @@ class OAuthSimple {
         $cLength = strlen($this->_nonce_chars);
         for ($i=0; $i < $length; $i++)
         {
-            $rnum = rand(0,$cLength);
+            $rnum = rand(0,$cLength - 1);
             $result .= substr($this->_nonce_chars,$rnum,1);
         }
         $this->_parameters['oauth_nonce'] = $result;
