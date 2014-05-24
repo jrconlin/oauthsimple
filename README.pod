@@ -36,6 +36,25 @@ L<http://github.com/itrelease/oauthsimple>
 OAuth Developers may be interested in my OAuthTestPage at:
 L<http://jrconlin.github.com/OAuthTestPage/>
 This will display OAuth1a valid elements and values so you can verify things are working correctly.
+=head1 EXAMPLES
+
+Node.js Installation
+
+    > npm install oauthsimple
+
+Node.js Example
+
+    OAuthSimple = require('OAuthSimple')
+    oauth = new OAuthSimple("token", "secret")
+    request = oauth.sign({
+      action: "GET",
+      path: "http://api.netflix.com/catalog/people",
+      parameters: { term: 'DeNiro' }
+    })
+
+    // then use any library to request the following url
+    request.signed_url
+
 
 =head1 LICENSE
 
