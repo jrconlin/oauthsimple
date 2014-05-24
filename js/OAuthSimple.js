@@ -482,3 +482,9 @@ if (OAuthSimple === undefined)
     return self;
     };
 }
+
+
+// CommonJS Support
+if (module && exports) {
+    module.exports = OAuthSimple;
+}
