@@ -202,7 +202,7 @@ if (OAuthSimple === undefined)
                 this._secrets.oauth_token = this._secrets.access_token;
                 }
             if (this._secrets['access_secret']) {
-                this._secrets.oauth_secret = this._secrets.access_secret;
+                this._secrets.shared_secret = this._secrets.access_secret;
                 }
             if (this._secrets['oauth_token_secret']) {
                 this._secrets.oauth_secret = this._secrets.oauth_token_secret;
@@ -271,7 +271,7 @@ if (OAuthSimple === undefined)
             return {
                 parameters: this._parameters,
                 signature: this._oauthEscape(this._parameters['oauth_signature']),
-                signed_url: this._path + '?' + this._normalizedParameters(),
+                signed_url: this._path + '?' + normParams,
                 header: this.getHeaderString()
             };
         };
@@ -450,7 +450,7 @@ if (OAuthSimple === undefined)
             return elements.join('&');
         };
 
-        self._generateSignature = function() {
+        self._generateSignature = function(normParams="") {
 
             var secretKey = this._oauthEscape(this._secrets.shared_secret) + '&' +
                 this._oauthEscape(this._secrets.oauth_secret);
@@ -458,9 +458,12 @@ if (OAuthSimple === undefined)
             {
                 return secretKey;
             }
+            if (normParams == "") {
+                normParams = this._normalizedParameters();
+            }
             if (this._parameters['oauth_signature_method'] == 'HMAC-SHA1')
             {
-                var sigString = this._oauthEscape(this._action) + '&' + this._oauthEscape(this._path) + '&' + this._oauthEscape(this._normalizedParameters());
+                var sigString = this._oauthEscape(this._action) + '&' + this._oauthEscape(this._path) + '&' + this.normParams);
                 return this.b64_hmac_sha1(secretKey, sigString);
             }
             return null;

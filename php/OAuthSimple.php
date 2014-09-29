@@ -198,11 +198,11 @@ class OAuthSimple {
 		}
         if (isset($this->_secrets['access_secret']))
 		{
-            $this->_secrets['oauth_secret'] = $this->_secrets['access_secret'];
+            $this->_secrets['shared_secret'] = $this->_secrets['access_secret'];
         }
-        if (isset($this->_secrets['access_token_secret']))
+        if (isset($this->_secrets['oauth_token_secret']))
 		{
-            $this->_secrets['oauth_secret'] = $this->_secrets['access_token_secret'];
+            $this->_secrets['oauth_secret'] = $this->_secrets['oauth_token_secret'];
 		}
         if (empty($this->_secrets['consumer_key']))
 		{
@@ -289,7 +289,7 @@ class OAuthSimple {
         return Array (
             'parameters' => $this->_parameters,
             'signature' => self::_oauthEscape($this->_parameters['oauth_signature']),
-            'signed_url' => $this->_path . '?' . $this->_normalizedParameters(),
+            'signed_url' => $this->_path . '?' . $normParams,
             'header' => $this->getHeaderString(),
             'sbs'=> $this->sbs
             );
@@ -374,7 +374,7 @@ class OAuthSimple {
 		}
         $string = rawurlencode($string);
 
-	//FIX: rawurlencode of ~ 
+	    //FIX: rawurlencode of ~ 
        	$string = str_replace('%7E','~', $string);
        	$string = str_replace('+','%20',$string);
         $string = str_replace('!','%21',$string);
@@ -477,7 +477,7 @@ class OAuthSimple {
     }
 
 
-    private function _generateSignature () 
+    private function _generateSignature ($parameters="") 
     {
         $secretKey = '';
 		if(isset($this->_secrets['shared_secret']))
@@ -489,13 +489,16 @@ class OAuthSimple {
 		if(isset($this->_secrets['oauth_secret']))
 		{
             $secretKey .= self::_oauthEscape($this->_secrets['oauth_secret']);
-		}
+        }
+        if(empty($parameters)){
+            $parameters = $this->_normalizedParameters();
+        }
         switch($this->_parameters['oauth_signature_method'])
         {
             case 'PLAINTEXT':
                 return urlencode($secretKey);;
             case 'HMAC-SHA1':
-                $this->sbs = self::_oauthEscape($this->_action).'&'.self::_oauthEscape($this->_path).'&'.self::_oauthEscape($this->_normalizedParameters());
+                $this->sbs = self::_oauthEscape($this->_action).'&'.self::_oauthEscape($this->_path).'&'.$parameters;
 
                 return base64_encode(hash_hmac('sha1',$this->sbs,$secretKey,TRUE));
             default:
