@@ -617,8 +617,8 @@ see .sign()
 	    if(defined($this->{_secrets}->{oauth_secret})) {
             $secretKey .= $this->_oauthEscape($this->{_secrets}->{oauth_secret});
         }
-        if (empty($normalizedParameters)) {
-            $normalizedParameters = $this->_normalizedParameters();
+        if (!empty($normalizedParameters)) {
+            $normalizedParameters = $this->_oauthEscape($normalizedParameters);
         }
         if ($this->{_parameters}->{oauth_signature_method} eq 'PLAINTEXT') {
             return $secretKey;
