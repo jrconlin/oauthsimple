@@ -490,9 +490,16 @@ class OAuthSimple {
 		{
             $secretKey .= self::_oauthEscape($this->_secrets['oauth_secret']);
         }
-        if(empty($parameters)){
-            $parameters = $this->_normalizedParameters();
+        
+        if(empty($parameters))
+        {
+            $parameters = urlencode($this->_normalizedParameters());
+        } 
+        else
+        {
+            $parameters = urlencode($parameters);
         }
+
         switch($this->_parameters['oauth_signature_method'])
         {
             case 'PLAINTEXT':
