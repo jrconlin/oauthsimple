@@ -617,15 +617,15 @@ see .sign()
 	    if(defined($this->{_secrets}->{oauth_secret})) {
             $secretKey .= $this->_oauthEscape($this->{_secrets}->{oauth_secret});
         }
-        if (empty($normalizedParameters)) {
-            $normalizedParameters = $this->_normalizedParameters();
+        if (!empty($normalizedParameters)) {
+            $normalizedParameters = $this->_oauthEscape($normalizedParameters);
         }
         if ($this->{_parameters}->{oauth_signature_method} eq 'PLAINTEXT') {
             return $secretKey;
         } elsif ($this->{_parameters}->{oauth_signature_method} eq 'HMAC-SHA1') {
             $this->{sbs} = $this->_oauthEscape($this->{_action}).'&'.$this->_oauthEscape($this->{_path}).'&'.$normalizedParameters;
             # For what it's worth, I prefer long form method calls like this since it identifies the source package.
-            return MIME::Base64::encode_base64(Digest::SHA::hmac_sha1($this->{sbs},$secretKey));
+            return MIME::Base64::encode_base64(Digest::SHA::hmac_sha1($this->{sbs},$secretKey),'');
         } else {
             Error::throw OAuthSimpleException('Unknown signature method for OAuthSimple');
         }
