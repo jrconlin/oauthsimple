@@ -284,7 +284,6 @@ class OAuthSimple {
 		}
         $this->setParameters($args['parameters']);
         $normParams = $this->_normalizedParameters();
-        $this->_parameters['oauth_signature'] = $this->_generateSignature($normParams);
 
         return Array (
             'parameters' => $this->_parameters,
@@ -433,8 +432,13 @@ class OAuthSimple {
 		$normalized_keys = array();
 		$return_array = array();
 
-		foreach ( $this->_parameters as $paramName=>$paramValue) {
-            if (!preg_match('/\w+_secret/',$paramName) OR (strpos($paramValue, '@') !== 0 && !file_exists(substr($paramValue, 1))) )
+        foreach ( $this->_parameters as $paramName=>$paramValue) {
+            if (preg_match('/w+_secret/', $paramName) OR
+                $paramName == "oauth_signature") {
+                    continue;
+                }
+            // Read parameters from a file. Hope you're practicing safe PHP.
+            if (strpos($paramValue, '@') !== 0 && !file_exists(substr($paramValue, 1)))
 			{
 				if (is_array($paramValue))
 				{
@@ -468,8 +472,11 @@ class OAuthSimple {
 				array_push($return_array, $key .'='. $val);
 			}
 
-		}
-
+        }
+        $presig = join("&", $return_array);
+        $sig = $this->_generateSignature($presig);
+        $this->_parameters['oauth_signature']=$sig;
+        array_push($return_array, "oauth_signature=$sig");
 		return join("&", $return_array);
     }
 
