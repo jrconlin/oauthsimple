@@ -236,7 +236,7 @@ class OAuthSimple:
         elif (self._parameters['oauth_signature_method'] == 'HMAC-SHA1'):
             self.sbs = '&'.join([self._oauthEscape(self._action),
                                 self._oauthEscape(self._path),
-                                normParamString])
+                                self._oauthEscape(normParamString)])
         return base64.b64encode(hmac.new(secretKey,
                                 self.sbs,
                                 hashlib.sha1).digest())

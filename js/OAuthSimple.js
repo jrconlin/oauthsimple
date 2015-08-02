@@ -2,7 +2,7 @@
   * A simpler version of OAuth
   *
   * author:     jr conlin
-  * mail:       src@anticipatr.com
+  * mail:       src+oa@jrconlin.com
   * copyright:  unitedHeroes.net
   * version:    1.2
   * url:        http://unitedHeroes.net/OAuthSimple
