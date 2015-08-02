@@ -113,7 +113,7 @@ Create a new instance of OAuthSimple, optionally initializing the low security s
 
  The API Key (sometimes referred to as the consumer key) This value is usually supplied by the site you wish to use.
 
-=item shared_secret (string) 
+=item shared_secret (string)
 
 The shared secret. This value is also usually provided by the site you wish to use.
 
@@ -141,7 +141,7 @@ The shared secret. This value is also usually provided by the site you wish to u
         return $this;
     }
 
-=pod 
+=pod
 
 =head2 B<reset>();
 
@@ -154,7 +154,7 @@ Reinitialize the current OAuthSimple object, purging parameters and paths, but k
         $this->{_parameters}=undef;
         $this->{path}=undef;
         $this->{sbs}=undef;
-        return $this;    
+        return $this;
     }
 
 =pod
@@ -165,7 +165,7 @@ set the parameters either from a hash or a string
 
 =over
 
-=item {string or HASH} 
+=item {string or HASH}
 
 List of parameters for the call, this can either be a URI string (e.g. "foo=bar&gorp=banana" or an hash)
 
@@ -175,7 +175,7 @@ List of parameters for the call, this can either be a URI string (e.g. "foo=bar&
     sub setParameters {
         my $this = shift;
         my $parameters = shift;
-        
+
         if (defined($parameters)) {
             if (ref($parameters) eq '') {
                 $parameters = $this->_parseParameterString($parameters);
@@ -205,6 +205,7 @@ List of parameters for the call, this can either be a URI string (e.g. "foo=bar&
         if (empty($this->{_parameters}->{oauth_version})) {
             $this->{_parameters}->{oauth_version}="1.0";
         }
+        $this->_normalizedParameters();
         return $this;
     }
 
@@ -231,7 +232,7 @@ Convenience method for setParameters();
 
 =over
 
-=item path {string} 
+=item path {string}
 
 the fully qualified URI (excluding query arguments) (e.g "http://example.org/foo")
 
@@ -270,7 +271,7 @@ set the "action" for the url, (e.g. GET,POST, DELETE, etc.)
 
 =over
 
-=item action {string} 
+=item action {string}
 
 HTTP Action word.
 
@@ -294,9 +295,9 @@ HTTP Action word.
 
 set the signatures (as well as validate the ones you have)
 
-=over 
+=over
 
-=item signatures {object} 
+=item signatures {object}
 
 object/hash of the token/signature pairs {oauth_consumer_key:, shared_secret:, oauth_token: oauth_secret:}
 
@@ -356,7 +357,7 @@ Convenience method for signatures
         return $this->signatures(shift);
     }
 
-=pod 
+=pod
 
 =head2 setSignatureMethod(I<method>)
 
@@ -364,7 +365,7 @@ set the signature method (currently only Plaintext or SHA-MAC1) Currently defaul
 
 =over
 
-=item method {string} 
+=item method {string}
 
 Method of signing the transaction (only PLAINTEXT and SHA-MAC1 allowed for now)
 
@@ -392,9 +393,9 @@ sign the request
 
 note: all arguments are optional, provided you've set them using the other helper functions.
 
-=over 
+=over
 
-=item args {object} 
+=item args {object}
 
 hash of arguments for the call. Allowed elements are:
 
@@ -427,7 +428,7 @@ hash of arguments for the call. Allowed elements are:
         }
         if (!empty($args->{method})) {
             $this->setSignatureMethod($args->{method});
-        } 
+        }
         if (!empty($args->{signatures})) {
             $this->signatures($args->{signatures});
         }
@@ -455,13 +456,13 @@ ways to do that.
 
 =over
 
-=item args {object} 
+=item args {object}
 
 see .sign()
 
 =back
 =cut;
-    sub getHeaderString { 
+    sub getHeaderString {
         my $this=shift;
         my $args=shift;
         my $result = 'OAuth ';
@@ -470,8 +471,7 @@ see .sign()
             $this->sign($args);
         }
 
-        my ($pName,$pValue);
-        while (($pName,$pValue) = each %{$this->{_parameters}}) {
+        foreach my $pName (sort keys %{$this->{_parameters}}) {
             my $pValue = $this->{_parameters}->{$pName};
             if ($pName !~ /^oauth_/) {
                 next;
@@ -543,7 +543,7 @@ see .sign()
     sub _getNonce {
         my $this=shift;
         my $length=shift || 5;
-        my $result = '';    
+        my $result = '';
         my $cLength = length($this->{_nonce_chars});
 
         for (my $i=0; $i < $length; $i++)
@@ -609,7 +609,7 @@ see .sign()
         my $this=shift;
         my $normalizedParameters = shift;
         my $secretKey = '';
-    
+
     	if(defined($this->{_secrets}->{shared_secret})) {
 	        $secretKey = $this->_oauthEscape($this->{_secrets}->{shared_secret});
         }
@@ -671,7 +671,7 @@ JR Conlin, jrconlin.com
 
 This class is licensed under BSD, see source for details.
 
-=head1 AVAILABILITY 
+=head1 AVAILABILITY
 
 see L<http://jrconlin.com/oauthsimple> for current repository
 
