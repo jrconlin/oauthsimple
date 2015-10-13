@@ -450,8 +450,10 @@ if (OAuthSimple === undefined)
             return elements.join('&');
         };
 
-        self._generateSignature = function(normParams="") {
-
+        self._generateSignature = function(normParams) {
+            if (normParams == null) {
+               normParams = "";
+            }
             var secretKey = this._oauthEscape(this._secrets.shared_secret) + '&' +
                 this._oauthEscape(this._secrets.oauth_secret);
             if (this._parameters['oauth_signature_method'] == 'PLAINTEXT')
@@ -463,7 +465,7 @@ if (OAuthSimple === undefined)
             }
             if (this._parameters['oauth_signature_method'] == 'HMAC-SHA1')
             {
-                var sigString = this._oauthEscape(this._action) + '&' + this._oauthEscape(this._path) + '&' + this.normParams);
+                var sigString = this._oauthEscape(this._action) + '&' + this._oauthEscape(this._path) + '&' + this.normParams;
                 return this.b64_hmac_sha1(secretKey, sigString);
             }
             return null;
