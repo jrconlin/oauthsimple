@@ -438,21 +438,22 @@ class OAuthSimple {
                     continue;
                 }
             // Read parameters from a file. Hope you're practicing safe PHP.
-            if (strpos($paramValue, '@') !== 0 && !file_exists(substr($paramValue, 1)))
-			{
-				if (is_array($paramValue))
-				{
-					$normalized_keys[self::_oauthEscape($paramName)] = array();
-					foreach($paramValue as $item)
-					{
-						array_push($normalized_keys[self::_oauthEscape($paramName)],  self::_oauthEscape($item));
-					}
-				}
-				else
-				{
-					$normalized_keys[self::_oauthEscape($paramName)] = self::_oauthEscape($paramValue);
-				}
-			}
+            if (strpos($paramValue, '@') === 0 && file_exists(substr($paramValue, 1)))
+            {
+		        continue;
+            }
+            if (is_array($paramValue))
+            {
+                $normalized_keys[self::_oauthEscape($paramName)] = array();
+        		foreach($paramValue as $item)
+        		{
+        			array_push($normalized_keys[self::_oauthEscape($paramName)],  self::_oauthEscape($item));
+        		}
+        	}
+        	else
+        	{
+        		$normalized_keys[self::_oauthEscape($paramName)] = self::_oauthEscape($paramValue);
+        	}
         }
 
 		ksort($normalized_keys);
