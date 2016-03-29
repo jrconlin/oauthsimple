@@ -6,7 +6,7 @@
  *
  * @author     jr conlin <src@jrconlin.com>
  * @copyright  unitedHeroes.net 2011
- * @version    1.3
+ * @version    1.3.1
  * @license    See license.txt
  *
  */
@@ -474,7 +474,7 @@ class OAuthSimple {
 
         }
         $presig = join("&", $return_array);
-        $sig = $this->_generateSignature($presig);
+        $sig = urlencode($this->_generateSignature($presig));
         $this->_parameters['oauth_signature']=$sig;
         array_push($return_array, "oauth_signature=$sig");
 		return join("&", $return_array);
