@@ -490,6 +490,6 @@ if (OAuthSimple === undefined)
 
 
 // CommonJS Support
-if (module && exports) {
+if (typeof exports === 'object' && typeof module !== 'undefined') { 
     module.exports = OAuthSimple;
 }
